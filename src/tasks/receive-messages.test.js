@@ -9,6 +9,12 @@ jest.mock('~/src/messaging/event.js')
 jest.mock('~/src/service/index.js')
 jest.mock('~/src/helpers/logging/logger.js')
 
+/**
+ * @returns {void}
+ */
+// eslint-disable-next-line @typescript-eslint/no-empty-function
+function voidFn() {}
+
 describe('receive-messages', () => {
   const message = /** @type {Message} */ ({
     MessageId: 'ea9c724f-2292-4ccd-93b2-86653dca9de2',
@@ -17,12 +23,6 @@ describe('receive-messages', () => {
     Body: 'hello world',
     MessageAttributes: {}
   })
-
-  /**
-   * @returns {void}
-   */
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  function voidFn() {}
 
   describe('runTaskOnce', () => {
     it('should save and delete new messages', async () => {

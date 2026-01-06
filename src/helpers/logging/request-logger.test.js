@@ -1,5 +1,7 @@
 import { requestLogger } from '~/src/helpers/logging/request-logger.js'
 
+const RESPONSE_TIME = 20
+
 describe('request-logger', () => {
   it('should log requests', () => {
     const oid = '9c145f66-0ce8-435f-a6aa-f1f0041baebc'
@@ -22,7 +24,7 @@ describe('request-logger', () => {
             }
           }
         },
-        20
+        RESPONSE_TIME
       )
     ).toBe(
       '[response] [9c145f66-0ce8-435f-a6aa-f1f0041baebc]  GET /audit/forms/12121212 200 (20ms)'
@@ -47,7 +49,7 @@ describe('request-logger', () => {
             }
           }
         },
-        20
+        RESPONSE_TIME
       )
     ).toBe('[response] GET /audit/forms/12121212 200 (20ms)')
   })

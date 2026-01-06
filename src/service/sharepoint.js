@@ -32,9 +32,7 @@ export function loadFormMappings() {
 }
 
 const formMappings = loadFormMappings()
-const allowedForms = new Map(
-  formMappings.map((config) => [config.formId, config])
-)
+const allowedForms = new Map(formMappings.map((conf) => [conf.formId, conf]))
 
 /**
  * Strips spaces to match the name that Sharepoint would use internally for a field
@@ -54,6 +52,7 @@ export function lpad(num) {
 
 /**
  * @param { string | number | DateObject | undefined } value - incoming value
+ * @returns { string | number | Date | undefined }
  */
 export function coerceDatatype(value) {
   if (value && Object.keys(value).includes('day')) {
@@ -62,7 +61,10 @@ export function coerceDatatype(value) {
       `${dateObject.year}-${lpad(dateObject.month)}-${lpad(dateObject.day)}`
     )
   }
-  return value
+  if (typeof value === 'number' || typeof value === 'string') {
+    return value
+  }
+  return undefined
 }
 
 /**
