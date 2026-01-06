@@ -85,15 +85,13 @@ export function addItemsByFieldName(siteId, listId, fields) {
  * @returns {Promise<void>}
  */
 export async function saveToSharepointList(message) {
-  // Check if the message is for saving to Sharepoint
-  if (!allowedForms.has(message.meta.formId)) {
+  // Check if the message is enabled for saving to Sharepoint
+  const allowedForm = allowedForms.get(message.meta.formId)
+  if (!allowedForm) {
     return
   }
 
-  const { siteId, listId } = allowedForms.get(message.meta.formId) ?? {
-    siteId: '',
-    listId: ''
-  }
+  const { siteId, listId } = allowedForm
   const { formId, status, versionMetadata } = message.meta
 
   logger.info(
