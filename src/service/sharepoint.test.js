@@ -3,6 +3,8 @@ import { definitionForSharepointTest } from '~/src/service/__stubs__/forms.js'
 import { messageForSharepointTest } from '~/src/service/__stubs__/messages.js'
 import {
   addItemsByFieldName,
+  coerceDatatype,
+  escapeFieldName,
   saveToSharepointList
 } from '~/src/service/sharepoint.js'
 
@@ -79,6 +81,35 @@ describe('sharepoint', () => {
           Yourname: 'John'
         }
       })
+    })
+  })
+
+  describe('escapeFieldName', () => {
+    it('should translate name as appropriate', () => {
+      expect(escapeFieldName(undefined)).toBe('')
+      expect(escapeFieldName('')).toBe('')
+      expect(escapeFieldName('abc DEF')).toBe('abcDEF')
+      expect(escapeFieldName('abcd   GHI')).toBe('abcdGHI')
+    })
+  })
+
+  describe('coerceDatatype', () => {
+    it('should coerce value into appropriate data type', () => {
+      // Date
+      const dateVal = coerceDatatype({ day: 5, month: 2, year: 2000 })
+      expect(typeof dateVal).toBe('object')
+      expect(dateVal?.toString()).toEqual(new Date(2000, 1, 5).toString())
+      // String
+      const stringVal = coerceDatatype('Some string')
+      expect(typeof stringVal).toBe('string')
+      expect(stringVal).toBe('Some string')
+      // Number
+      const numberVal = coerceDatatype(12345)
+      expect(typeof numberVal).toBe('number')
+      expect(numberVal).toBe(12345)
+      // Undefined
+      const undefVal = coerceDatatype(undefined)
+      expect(undefVal).toBeUndefined()
     })
   })
 })
