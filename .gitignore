@@ -9,3 +9,6 @@ coverage
 .cache
 .eslintcache
 .env
+newman-reports
+*.tsbuildinfo
+*.env
