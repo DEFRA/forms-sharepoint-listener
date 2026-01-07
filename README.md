@@ -12,7 +12,7 @@ Core delivery platform Node.js Backend Template.
     - [Testing](#testing)
     - [Production](#production)
     - [Notes on SQS queue configuration](#notes-on-sqs-queue-configuration)
-      - [Queue configuration in forms-audit-api](#queue-configuration-in-forms-audit-api)
+      - [Queue configuration in forms-sharepoint-listener](#queue-configuration-in-forms-sharepoint-listener)
     - [Npm scripts](#npm-scripts)
     - [Update dependencies](#update-dependencies)
     - [Formatting](#formatting)
@@ -68,6 +68,29 @@ AWS_SECRET_ACCESS_KEY=dummy
 RECEIVE_MESSAGE_TIMEOUT_MS=5000
 MANAGER_URL=http://localhost:3001
 DESIGNER_URL=http://localhost:3000
+SHAREPOINT_TENANT_ID=<tenant id where app reg resides>
+SHAREPOINT_CLIENT_ID=<client id of app reg>
+SHAREPOINT_CLIENT_SECRET=<client secret of app reg>
+SHAREPOINT_FORM_MAPPINGS=<JSON string of mappings - see below>
+```
+
+SHAREPOINT_FORM_MAPPINGS has the following structure but should be supplied as a single-line string (it can have one or more mapping rows):
+
+```
+{
+    "mappings":[
+        {
+            "formId":"form-guid-1",
+            "siteId":"site-guid-1",
+            "listId":"list-guid-1"
+        },
+        {
+            "formId":"form-guid-2",
+            "siteId":"site-guid-2",
+            "listId":"list-guid-2"
+        }
+    ]
+}
 ```
 
 For proxy options, see https://www.npmjs.com/package/proxy-from-env which is used by https://github.com/TooTallNate/proxy-agents/tree/main/packages/proxy-agent. It's currently supports Hapi Wreck only, e.g. in the JWKS lookup.
@@ -127,7 +150,7 @@ By default, CDP set `ReceiveMessageWaitTime` to 20s. The auditing queue also use
 
 See [here](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-short-and-long-polling.html) for more information.
 
-#### Queue configuration in forms-audit-api
+#### Queue configuration in forms-sharepoint-listener
 
 `RECEIVE_MESSAGE_TIMEOUT_MS` - the amount of time to wait between calls to receive messages
 
