@@ -24,7 +24,7 @@ export const config = convict({
   port: {
     doc: 'The port to bind.',
     format: 'port',
-    default: 3006,
+    default: 3007,
     env: 'PORT'
   },
   serviceName: {

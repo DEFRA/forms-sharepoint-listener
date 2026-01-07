@@ -1,6 +1,6 @@
 # forms-sharepoint-listener
 
-Core delivery platform Node.js Backend Template.
+Core delivery platform Node.js Backend Template - Service to handle form submission events on SQS queue and save to Sharepoint lists.
 
 - [forms-sharepoint-listener](#forms-sharepoint-listener)
   - [Requirements](#requirements)
