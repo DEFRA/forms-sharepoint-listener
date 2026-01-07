@@ -4,7 +4,7 @@
  * @returns {string} The escaped string.
  */
 export function escapeRegExp(string) {
-  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  return string.replaceAll(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`)
 }
 
 /**

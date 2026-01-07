@@ -1,4 +1,4 @@
-import { cwd } from 'process'
+import { cwd } from 'node:process'
 
 import 'dotenv/config'
 import convict from 'convict'
@@ -122,6 +122,12 @@ export const config = convict({
       default: '',
       env: 'SHAREPOINT_CLIENT_SECRET'
     },
+    /**
+     * JSON representation of forms allowed to write to Sharepoint, and which site/list they write to.
+     * Can have multiple form mappings.
+     * Should be in the following valid JSON format as a single string:
+     * '{"mappings":[{"formId":"your-form-guid","siteId":"your-site-guid","listId":"your-list-guid"}]}'
+     */
     formMappings: {
       format: String,
       default: '{"mappings":[]}',
@@ -158,7 +164,6 @@ export const config = convict({
     env: 'ENABLE_METRICS'
   },
   /**
-   * @todo We plan to replace `node-convict` with `joi` and remove all defaults.
    * These OIDC/roles are for the DEV application in the DEFRA tenant.
    */
   oidcJwksUri: {

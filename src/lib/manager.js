@@ -18,7 +18,7 @@ export async function getFormDefinition(formId, formStatus, versionNumber) {
 
   const statusPath = formStatus === FormStatus.Draft ? FormStatus.Draft : ''
   const formUrl =
-    versionNumber !== undefined
+    versionNumber || versionNumber === 0
       ? new URL(
           `/forms/${formId}/versions/${versionNumber}/definition`,
           managerUrl
