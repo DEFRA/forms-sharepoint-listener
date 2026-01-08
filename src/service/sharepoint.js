@@ -1,4 +1,10 @@
-import { hasComponentsEvenIfNoNext } from '@defra/forms-model'
+import { FormModel } from '@defra/forms-engine-plugin/engine/models/FormModel.js'
+import {
+  ComponentType,
+  hasComponentsEvenIfNoNext,
+  hasRepeater,
+  replaceCustomControllers
+} from '@defra/forms-model'
 
 import { config } from '~/src/config/index.js'
 import { createLogger } from '~/src/helpers/logging/logger.js'
@@ -23,6 +29,10 @@ const graphClient = getGraphClient()
  */
 
 /**
+ * @typedef { string | number | Date | undefined } CellValue
+ */
+
+/**
  * Parses JSON config of form mappings
  * @returns {FormMapping[]} Array of form mappings
  */
@@ -43,35 +53,66 @@ export function escapeFieldName(name) {
 }
 
 /**
- * Left pad with a zero if necessary
- * @param {number} num
+ * Coerce the value from text if the component is a
+ * DatePartsField, MonthYearField or NumberField
+ * @param {string | undefined} asText - the value as text
+ * @param {Component} component - the form component
+ * @returns {CellValue} the spreadsheet cell value
  */
-export function lpad(num) {
-  return num < 10 ? `0${num}` : `${num}`
+export function coerceDataValue(asText, component) {
+  if (asText) {
+    if (
+      component.type === ComponentType.DatePartsField ||
+      component.type === ComponentType.MonthYearField
+    ) {
+      return new Date(asText)
+    }
+    if (component.type === ComponentType.NumberField) {
+      return Number.parseFloat(asText)
+    }
+  }
+
+  return asText
 }
 
 /**
- * @param { string | number | DateObject | undefined } value - incoming value
- * @returns { string | number | Date | undefined }
+ * Extracts the component value from the provided data and coerces to the appropriate type
+ * @param {Record<string, any>} data - the answers data
+ * @param {string} key - the component key (name)
+ * @param {Component} component - the form component
+ * @returns {CellValue}
  */
-export function coerceDatatype(value) {
-  if (value && Object.keys(value).includes('day')) {
-    const dateObject = /** @type {DateObject} */ (value)
-    return new Date(
-      `${dateObject.year}-${lpad(dateObject.month)}-${lpad(dateObject.day)}`
-    )
-  }
-  if (typeof value === 'number' || typeof value === 'string') {
-    return value
-  }
-  return undefined
+export function getValue(data, key, component) {
+  const asText =
+    key in data ? component.getDisplayStringFromFormValue(data[key]) : undefined
+
+  return coerceDataValue(asText, component)
+}
+
+/**
+ * @param {FormDefinition} definition
+ */
+export function createMapOfComponentNameToShortDesc(definition) {
+  return new Map(
+    definition.pages.flatMap((page) => {
+      const pageWithComponents = hasComponentsEvenIfNoNext(page)
+        ? page.components
+        : []
+      return pageWithComponents.map((comp) => [
+        comp.name,
+        escapeFieldName(
+          'shortDescription' in comp ? comp.shortDescription : comp.name
+        )
+      ])
+    })
+  )
 }
 
 /**
  * Adds items to a SharePoint list
  * @param {string} siteId - id of the site
  * @param {string} listId - id of the list
- * @param {Map<string, string>} fields - record of field names and values
+ * @param {Map<string, CellValue>} fields - record of field names and values
  */
 export function addItemsByFieldName(siteId, listId, fields) {
   return graphClient.api(`/sites/${siteId}/lists/${listId}/items`).post({
@@ -93,6 +134,7 @@ export async function saveToSharepointList(message) {
 
   const { siteId, listId } = allowedForm
   const { formId, status, versionMetadata } = message.meta
+  const data = message.data
 
   logger.info(
     `Saving data for form id ${formId} version ${versionMetadata?.versionNumber} to sharepoint list`
@@ -104,62 +146,57 @@ export async function saveToSharepointList(message) {
     versionMetadata?.versionNumber
   )
 
-  const componentNameToShortDesc = new Map(
-    definition.pages.flatMap((page) => {
-      const pageWithComponents = hasComponentsEvenIfNoNext(page)
-        ? page.components
-        : []
-      return pageWithComponents.map((comp) => [
-        comp.name,
-        escapeFieldName(
-          'shortDescription' in comp ? comp.shortDescription : comp.name
-        )
-      ])
-    })
-  )
+  const componentNameToShortDesc =
+    createMapOfComponentNameToShortDesc(definition)
 
   /**
-   * @param {string} key - data element key
+   * @param {Component} component
    */
-  function getShortDescription(key) {
-    return componentNameToShortDesc.get(key) ?? 'unknown'
+  function getSharepointFieldName(component) {
+    return (
+      componentNameToShortDesc.get(component.name) ??
+      escapeFieldName(component.name)
+    )
   }
 
-  // Get all the components that exist in the message data and
-  // convert them to a map of column name (short description) to value.
-  // This is done is categories of 'mainColumns', 'fileColumns' and 'repeaterColumns'
+  const formModel = new FormModel(replaceCustomControllers(definition), {
+    basePath: '',
+    versionNumber: versionMetadata?.versionNumber
+  })
 
-  const mainColumns = new Map(
-    Object.entries(message.data.main).map(([key, value]) => [
-      getShortDescription(key),
-      coerceDatatype(value)
-    ])
-  )
+  /** @type {Map<string, CellValue >} */
+  const fields = new Map()
 
   // Add submission date
-  mainColumns.set(escapeFieldName('Submission date'), message.meta.timestamp)
+  fields.set(escapeFieldName('Submission date'), message.meta.timestamp)
 
-  // Add files
-  const fileColumns = new Map(
-    Object.entries(message.data.files).map(([key, value]) => {
-      const fileLinks = Array.isArray(value)
-        ? value.map((f) => f.userDownloadLink).join(' \r\n')
+  formModel.componentMap.forEach((component, key) => {
+    if (!component.isFormComponent) {
+      return
+    }
+
+    if (hasRepeater(component.page.pageDef)) {
+      const repeaterName = component.page.pageDef.repeat.options.name
+      const hasRepeaterData = repeaterName in data.repeaters
+      const items = hasRepeaterData ? data.repeaters[repeaterName] : []
+
+      for (let index = 0; index < items.length; index++) {
+        const value = getValue(items[index], key, component)
+        const componentKey = `${getSharepointFieldName(component)}${index + 1}`
+
+        fields.set(componentKey, value)
+      }
+    } else if (component.type === ComponentType.FileUploadField) {
+      const files = data.files[component.name]
+      const fileLinks = Array.isArray(files)
+        ? files.map((f) => f.userDownloadLink).join(' \r\n')
         : ''
-      return [getShortDescription(key), fileLinks]
-    })
-  )
 
-  // Add repeaters
-  const repeaterColumns = new Map()
-  Object.entries(message.data.repeaters).forEach(([, repeaterRows]) => {
-    for (let index = 0; index < repeaterRows.length; index++) {
-      const row = repeaterRows[index]
-      Object.entries(row).forEach(([key, value]) => {
-        const componentKey = escapeFieldName(
-          `${getShortDescription(key)} ${index + 1}`
-        )
-        repeaterColumns.set(componentKey, coerceDatatype(value))
-      })
+      fields.set(getSharepointFieldName(component), fileLinks)
+    } else {
+      const value = getValue(data.main, key, component)
+
+      fields.set(getSharepointFieldName(component), value)
     }
   })
 
@@ -167,15 +204,13 @@ export async function saveToSharepointList(message) {
     `Constructed data for form id ${formId} - about to call Sharepoint`
   )
 
-  await addItemsByFieldName(
-    siteId,
-    listId,
-    new Map([...mainColumns, ...fileColumns, ...repeaterColumns])
-  )
+  await addItemsByFieldName(siteId, listId, fields)
 
   logger.info(`Saved successfully to Sharepoint for form id ${formId}`)
 }
 
 /**
+ * @import { FormDefinition } from '@defra/forms-model'
  * @import { FormAdapterSubmissionMessage } from '@defra/forms-engine-plugin/engine/types.js'
+ * @import { Component } from '@defra/forms-engine-plugin/engine/components/helpers/components.js'
  */

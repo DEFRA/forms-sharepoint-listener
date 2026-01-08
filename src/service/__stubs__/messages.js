@@ -17,7 +17,28 @@ export const messageForSharepointTest = {
     }
   },
   data: {
-    main: { wVRKCI: 'John' },
+    main: {
+      wVRKCI: 'John Smith',
+      WInVOJ: `multiline line 1
+line 2
+line 3`,
+      ZikKKi: 12345,
+      lNTqki: { day: 12, month: 12, year: 2026 },
+      GesUIU: { month: 10, year: 2026 },
+      EcAuAJ: {
+        addressLine1: '1 Test Street',
+        town: 'Testington',
+        postcode: 'TS1 1TS'
+      },
+      QpxLOe: '+441234123456',
+      qSQlXQ: 'email1@testing.co.uk',
+      Hkrpqu: true,
+      itTQpn: ['Item 2'],
+      KDVPWv: 'Radio 1',
+      JLyrSq: 'Autocomplete 2',
+      ZjjIss: 'Select option 2',
+      LNOPHF: 'true'
+    },
     repeaters: {
       LAWQBm: [
         { jRCnMi: 'Apple', mtJFqE: { day: 1, month: 11, year: 2000 } },

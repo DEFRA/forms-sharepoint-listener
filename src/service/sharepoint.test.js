@@ -3,7 +3,6 @@ import { definitionForSharepointTest } from '~/src/service/__stubs__/forms.js'
 import { messageForSharepointTest } from '~/src/service/__stubs__/messages.js'
 import {
   addItemsByFieldName,
-  coerceDatatype,
   escapeFieldName,
   saveToSharepointList
 } from '~/src/service/sharepoint.js'
@@ -71,14 +70,29 @@ describe('sharepoint', () => {
       await saveToSharepointList(message)
       expect(mockClientPostCall).toHaveBeenCalledWith({
         fields: {
-          Dateofbirth1: new Date('2000-11-01T00:00:00.000Z'),
-          Dateofbirth2: new Date('1990-07-21T00:00:00.000Z'),
+          Autocompletefield: 'Autocomplete 2',
+          Checkboxesfield: 'Item 2',
+          Datepartsfield: new Date(2026, 11, 12),
+          Declarationquestion: 'I understand and agree',
+          Emailaddress: 'email1@testing.co.uk',
+          Dateofbirth1: new Date(2000, 10, 1),
+          Dateofbirth2: new Date(1990, 6, 21),
           Favouritefruit1: 'Apple',
           Favouritefruit2: 'Banana',
+          Monthandyear: new Date(2026, 9, 1),
+          Multiline: `multiline line 1
+line 2
+line 3`,
+          Number: 12345,
+          Phonenumber: '+441234123456',
+          Radiosfield: 'Radio 1',
+          Selectfield: 'Select option 2',
           Submissiondate: new Date('2026-01-06T13:05:51.322Z'),
+          Textfield: 'John Smith',
+          UKaddressfield: '1 Test Street, Testington, TS1 1TS',
+          Yesorno: 'Yes',
           Yourfile:
-            'http://host.docker.internal:3000/file-download/02ce8776-15b2-4b9c-93a4-e7821cf7cc34 \r\nhttp://host.docker.internal:3000/file-download/a94cf9e6-122a-41cc-b8c2-2e34df800e92',
-          Yourname: 'John'
+            'http://host.docker.internal:3000/file-download/02ce8776-15b2-4b9c-93a4-e7821cf7cc34 \r\nhttp://host.docker.internal:3000/file-download/a94cf9e6-122a-41cc-b8c2-2e34df800e92'
         }
       })
     })
@@ -90,26 +104,6 @@ describe('sharepoint', () => {
       expect(escapeFieldName('')).toBe('')
       expect(escapeFieldName('abc DEF')).toBe('abcDEF')
       expect(escapeFieldName('abcd   GHI')).toBe('abcdGHI')
-    })
-  })
-
-  describe('coerceDatatype', () => {
-    it('should coerce value into appropriate data type', () => {
-      // Date
-      const dateVal = coerceDatatype({ day: 5, month: 2, year: 2000 })
-      expect(typeof dateVal).toBe('object')
-      expect(dateVal?.toString()).toEqual(new Date(2000, 1, 5).toString())
-      // String
-      const stringVal = coerceDatatype('Some string')
-      expect(typeof stringVal).toBe('string')
-      expect(stringVal).toBe('Some string')
-      // Number
-      const numberVal = coerceDatatype(12345)
-      expect(typeof numberVal).toBe('number')
-      expect(numberVal).toBe(12345)
-      // Undefined
-      const undefVal = coerceDatatype(undefined)
-      expect(undefVal).toBeUndefined()
     })
   })
 })
