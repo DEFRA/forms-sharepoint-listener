@@ -46,10 +46,13 @@ const allowedForms = new Map(formMappings.map((conf) => [conf.formId, conf]))
 
 /**
  * Strips spaces to match the name that Sharepoint would use internally for a field
+ * NOTE - Sharepoint column names get truncated to max 32 characters
  * @param { string | undefined } name
  */
 export function escapeFieldName(name) {
-  return name?.replaceAll(' ', '') ?? ''
+  const fullName =
+    name?.replaceAll(' ', '').replaceAll("'", '').replace('-', '_x002d_') ?? ''
+  return fullName.length < 32 ? fullName : fullName.substring(0, 32)
 }
 
 /**

@@ -138,12 +138,6 @@ export const config = convict({
   /**
    * API integrations
    */
-  designerUrl: {
-    doc: 'URL to call Forms Designer',
-    format: String,
-    default: '',
-    env: 'DESIGNER_URL'
-  },
   managerUrl: {
     doc: 'URL to call Forms Manager API',
     format: String,

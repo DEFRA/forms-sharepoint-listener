@@ -104,6 +104,7 @@ line 3`,
       expect(escapeFieldName('')).toBe('')
       expect(escapeFieldName('abc DEF')).toBe('abcDEF')
       expect(escapeFieldName('abcd   GHI')).toBe('abcdGHI')
+      expect(escapeFieldName("abc-DE'F")).toBe('abc_x002d_DEF')
     })
   })
 })

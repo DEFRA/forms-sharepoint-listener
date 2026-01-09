@@ -58,7 +58,6 @@ docker compose up
 3. Create a `.env` file with the following mandatory environment variables populated at root level:
 
 ```text
-FORMS_AUDIT_QUEUE='forms_sharepoint_listener_events'
 LOG_LEVEL=debug
 SQS_ENDPOINT=http://localhost:4566
 AWS_REGION=eu-west-2
@@ -67,7 +66,6 @@ AWS_ACCESS_KEY_ID=dummy
 AWS_SECRET_ACCESS_KEY=dummy
 RECEIVE_MESSAGE_TIMEOUT_MS=5000
 MANAGER_URL=http://localhost:3001
-DESIGNER_URL=http://localhost:3000
 SHAREPOINT_TENANT_ID=<tenant id where app reg resides>
 SHAREPOINT_CLIENT_ID=<client id of app reg>
 SHAREPOINT_CLIENT_SECRET=<client secret of app reg>
