@@ -51,14 +51,20 @@ export function loadFormMappings(formMappingsConfig) {
   const mappings = JSON.parse(formMappingsConfig)
   const result = formMappingsSchema.validate(mappings)
   if (result.error) {
-    throw new Error(`Invalid Sharepoint form mappings config - ${result.error.message} : ${formMappingsConfig}`)
+    throw new Error(
+      `Invalid Sharepoint form mappings config - ${result.error.message} : ${formMappingsConfig}`
+    )
   }
-  const formMappingList = (/** @type {{ mappings: FormMapping[] }} */ (result.value))
+  const formMappingList = /** @type {{ mappings: FormMapping[] }} */ (
+    result.value
+  )
   return formMappingList.mappings
 }
 
 const formMappings = loadFormMappings(config.get('sharepoint').formMappings)
-const allowedForms = new Map(formMappings.map((conf) => [getConfigKey(conf), conf]))
+const allowedForms = new Map(
+  formMappings.map((conf) => [getConfigKey(conf), conf])
+)
 
 /**
  * Strips spaces to match the name that Sharepoint would use internally for a field
@@ -191,7 +197,10 @@ export async function saveToSharepointList(message) {
   fields.set(escapeFieldName('Submission date'), message.meta.timestamp)
 
   // Add submission type
-  fields.set(escapeFieldName('Submission type'), message.meta.isPreview ? 'Preview' : 'Real')
+  fields.set(
+    escapeFieldName('Submission type'),
+    message.meta.isPreview ? 'Preview' : 'Real'
+  )
 
   formModel.componentMap.forEach((component, key) => {
     if (!component.isFormComponent) {

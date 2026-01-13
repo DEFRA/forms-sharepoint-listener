@@ -117,7 +117,9 @@ line 3`,
     })
 
     it('should validate ok with two rows in array', () => {
-      const res = loadFormMappings('{"mappings":[{"formId":"695e4ec0e57ae17190adacba","siteId":"071a12a4-5ed0-4a08-bbf6-93a762e89bdb","listId":"0695483b-f344-419f-bc93-ee8aeee1b788","status":"draft"},{"formId":"696104cfab2e01c384cf6382","siteId":"071a12a4-5ed0-4a08-bbf6-93a762e89bdb","listId":"69c339f4-5c06-42ab-89f9-7db121c61fc3","status":"draft"}]}')
+      const res = loadFormMappings(
+        '{"mappings":[{"formId":"695e4ec0e57ae17190adacba","siteId":"071a12a4-5ed0-4a08-bbf6-93a762e89bdb","listId":"0695483b-f344-419f-bc93-ee8aeee1b788","status":"draft"},{"formId":"696104cfab2e01c384cf6382","siteId":"071a12a4-5ed0-4a08-bbf6-93a762e89bdb","listId":"69c339f4-5c06-42ab-89f9-7db121c61fc3","status":"draft"}]}'
+      )
       expect(res).toEqual([
         {
           formId: '695e4ec0e57ae17190adacba',
@@ -135,7 +137,9 @@ line 3`,
     })
 
     it('should throw if invalid config', () => {
-      expect(() => loadFormMappings('{"mappingsxx":{}}')).toThrow('Invalid Sharepoint form mappings config - "mappingsxx" is not allowed : {"mappingsxx":{}}')
+      expect(() => loadFormMappings('{"mappingsxx":{}}')).toThrow(
+        'Invalid Sharepoint form mappings config - "mappingsxx" is not allowed : {"mappingsxx":{}}'
+      )
     })
   })
 })
