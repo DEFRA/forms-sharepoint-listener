@@ -80,12 +80,14 @@ SHAREPOINT_FORM_MAPPINGS has the following structure but should be supplied as a
         {
             "formId":"form-guid-1",
             "siteId":"site-guid-1",
-            "listId":"list-guid-1"
+            "listId":"list-guid-1",
+            "status":"<live-or-draft>"
         },
         {
             "formId":"form-guid-2",
             "siteId":"site-guid-2",
-            "listId":"list-guid-2"
+            "listId":"list-guid-2",
+            "status":"<live-or-draft>"
         }
     ]
 }

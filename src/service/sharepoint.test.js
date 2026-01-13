@@ -4,6 +4,7 @@ import { messageForSharepointTest } from '~/src/service/__stubs__/messages.js'
 import {
   addItemsByFieldName,
   escapeFieldName,
+  loadFormMappings,
   saveToSharepointList
 } from '~/src/service/sharepoint.js'
 
@@ -88,6 +89,7 @@ line 3`,
           Radiosfield: 'Radio 1',
           Selectfield: 'Select option 2',
           Submissiondate: new Date('2026-01-06T13:05:51.322Z'),
+          Submissiontype: 'Preview',
           Textfield: 'John Smith',
           UKaddressfield: '1 Test Street, Testington, TS1 1TS',
           Yesorno: 'Yes',
@@ -105,6 +107,39 @@ line 3`,
       expect(escapeFieldName('abc DEF')).toBe('abcDEF')
       expect(escapeFieldName('abcd   GHI')).toBe('abcdGHI')
       expect(escapeFieldName("abc-DE'F")).toBe('abc_x002d_DEF')
+    })
+  })
+
+  describe('loadFormMappings', () => {
+    it('should validate ok with empty array', () => {
+      const res = loadFormMappings('{"mappings":[]}')
+      expect(res).toEqual([])
+    })
+
+    it('should validate ok with two rows in array', () => {
+      const res = loadFormMappings(
+        '{"mappings":[{"formId":"695e4ec0e57ae17190adacba","siteId":"071a12a4-5ed0-4a08-bbf6-93a762e89bdb","listId":"0695483b-f344-419f-bc93-ee8aeee1b788","status":"draft"},{"formId":"696104cfab2e01c384cf6382","siteId":"071a12a4-5ed0-4a08-bbf6-93a762e89bdb","listId":"69c339f4-5c06-42ab-89f9-7db121c61fc3","status":"draft"}]}'
+      )
+      expect(res).toEqual([
+        {
+          formId: '695e4ec0e57ae17190adacba',
+          siteId: '071a12a4-5ed0-4a08-bbf6-93a762e89bdb',
+          listId: '0695483b-f344-419f-bc93-ee8aeee1b788',
+          status: 'draft'
+        },
+        {
+          formId: '696104cfab2e01c384cf6382',
+          siteId: '071a12a4-5ed0-4a08-bbf6-93a762e89bdb',
+          listId: '69c339f4-5c06-42ab-89f9-7db121c61fc3',
+          status: 'draft'
+        }
+      ])
+    })
+
+    it('should throw if invalid config', () => {
+      expect(() => loadFormMappings('{"mappingsxx":{}}')).toThrow(
+        'Invalid Sharepoint form mappings config - "mappingsxx" is not allowed : {"mappingsxx":{}}'
+      )
     })
   })
 })
