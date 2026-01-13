@@ -6,6 +6,7 @@ import {
   replaceCustomControllers
 } from '@defra/forms-model'
 
+import { formMappingsSchema } from '~/src/config/form-mappings-schema.js'
 import { config } from '~/src/config/index.js'
 import { createLogger } from '~/src/helpers/logging/logger.js'
 import { getFormDefinition } from '~/src/lib/manager.js'
@@ -19,6 +20,7 @@ const graphClient = getGraphClient()
  * @property {string} siteId - guid for the sharepoint site
  * @property {string} listId - guid for the sharepoint list
  * @property {string} formId - guid for the form
+ * @property {FormStatus} status - live or draft
  */
 
 /**
@@ -33,16 +35,30 @@ const graphClient = getGraphClient()
  */
 
 /**
- * Parses JSON config of form mappings
- * @returns {FormMapping[]} Array of form mappings
+ * Construct key for storing unique config row
+ * @param { FormMapping | FormAdapterSubmissionMessageMeta } conf
  */
-export function loadFormMappings() {
-  const sharepoint = config.get('sharepoint')
-  return JSON.parse(sharepoint.formMappings).mappings
+export function getConfigKey(conf) {
+  return `${conf.formId}:${conf.status}`
 }
 
-const formMappings = loadFormMappings()
-const allowedForms = new Map(formMappings.map((conf) => [conf.formId, conf]))
+/**
+ * Parses JSON config of form mappings
+ * @param {string} formMappingsConfig
+ * @returns {FormMapping[]} Array of form mappings
+ */
+export function loadFormMappings(formMappingsConfig) {
+  const mappings = JSON.parse(formMappingsConfig)
+  const result = formMappingsSchema.validate(mappings)
+  if (result.error) {
+    throw new Error(`Invalid Sharepoint form mappings config - ${result.error.message} : ${formMappingsConfig}`)
+  }
+  const formMappingList = (/** @type {{ mappings: FormMapping[] }} */ (result.value))
+  return formMappingList.mappings
+}
+
+const formMappings = loadFormMappings(config.get('sharepoint').formMappings)
+const allowedForms = new Map(formMappings.map((conf) => [getConfigKey(conf), conf]))
 
 /**
  * Strips spaces to match the name that Sharepoint would use internally for a field
@@ -129,8 +145,9 @@ export function addItemsByFieldName(siteId, listId, fields) {
  * @returns {Promise<void>}
  */
 export async function saveToSharepointList(message) {
-  // Check if the message is enabled for saving to Sharepoint
-  const allowedForm = allowedForms.get(message.meta.formId)
+  // Check if the message is enabled for saving to Sharepoint for this formId/isPreview/status
+  const configKey = getConfigKey(message.meta)
+  const allowedForm = allowedForms.get(configKey)
   if (!allowedForm) {
     return
   }
@@ -173,6 +190,9 @@ export async function saveToSharepointList(message) {
   // Add submission date
   fields.set(escapeFieldName('Submission date'), message.meta.timestamp)
 
+  // Add submission type
+  fields.set(escapeFieldName('Submission type'), message.meta.isPreview ? 'Preview' : 'Real')
+
   formModel.componentMap.forEach((component, key) => {
     if (!component.isFormComponent) {
       return
@@ -213,7 +233,7 @@ export async function saveToSharepointList(message) {
 }
 
 /**
- * @import { FormDefinition } from '@defra/forms-model'
- * @import { FormAdapterSubmissionMessage } from '@defra/forms-engine-plugin/engine/types.js'
+ * @import { FormDefinition, FormStatus } from '@defra/forms-model'
+ * @import { FormAdapterSubmissionMessage, FormAdapterSubmissionMessageMeta } from '@defra/forms-engine-plugin/engine/types.js'
  * @import { Component } from '@defra/forms-engine-plugin/engine/components/helpers/components.js'
  */
