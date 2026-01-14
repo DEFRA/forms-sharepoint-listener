@@ -93,6 +93,8 @@ SHAREPOINT_FORM_MAPPINGS has the following structure but should be supplied as a
 }
 ```
 
+For further details on config and setup within Sharepoint, see [SHAREPOINT_SETUP.md](./docs/SHAREPOINT_SETUP.md)
+
 For proxy options, see https://www.npmjs.com/package/proxy-from-env which is used by https://github.com/TooTallNate/proxy-agents/tree/main/packages/proxy-agent. It's currently supports Hapi Wreck only, e.g. in the JWKS lookup.
 
 ### Development

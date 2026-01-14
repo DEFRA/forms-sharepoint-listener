@@ -1,4 +1,4 @@
-# Overview
+# Setting up Sharepoint and service configuration
 
 Defra Forms now has the capability to save submissions to a Sharepoint list. This service listens to SNS/SQS for form submissions and, if the form exists in the service config, the form submission is saved as a row in the Sharepoint list.
 
