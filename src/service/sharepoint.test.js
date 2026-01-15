@@ -98,6 +98,19 @@ line 3`,
         }
       })
     })
+
+    it('should throw if repeater name will blow limits', async () => {
+      const definition = structuredClone(definitionForSharepointTest)
+      const page = /** @type {PageQuestion} */ (definition.pages[2])
+      const component = /** @type{TextFieldComponent} */ (page.components[0])
+      component.shortDescription = 'Repeater Name That Is Too Long Herexx'
+      jest.mocked(getFormDefinition).mockResolvedValue(definition)
+      const message = structuredClone(messageForSharepointTest)
+      message.meta.formId = 'my-form-id'
+      await expect(() => saveToSharepointList(message)).rejects.toThrow(
+        'Repeater columns plus number index cannot be longer than 32 characters (with spaces stripped) - shortDesc: RepeaterNameThatIsTooLongHerexx15 formId: my-form-id'
+      )
+    })
   })
 
   describe('escapeFieldName', () => {
@@ -143,3 +156,7 @@ line 3`,
     })
   })
 })
+
+/**
+ * @import { PageQuestion, TextFieldComponent } from '@defra/forms-model'
+ */

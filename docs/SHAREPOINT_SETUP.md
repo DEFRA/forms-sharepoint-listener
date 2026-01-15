@@ -11,9 +11,9 @@ In order for a submission to get written to a Sharepoint list, the following is 
 - the values of formId, siteId, listId, and status (live or draft) must exist in the forms-sharepoint-listener config
 
 - the Sharepoint list (denoted by siteId and listId) must contain ALL columns from the source form
-  - the Sharepoint list column names must match the short description from each question
+  - the Sharepoint list column names must match the short description from each question **(and the naming is case-sensitive)**
 
-  - the short descriptions from the form must all be unique
+  - the short descriptions from the form must all be unique (within the first 32 characters if spaces are removed)
 
   - the Sharepoint list column datatypes must match according to the ‘Datatype mappings’ table below
 
@@ -38,6 +38,8 @@ If your form uses repeater pages, you need to setup the appropriate Sharepoint l
 - Field name 3
 
 - Field area 3
+
+**Note** - there is a limit of 32 characters on the ‘internal’ column name (the name used to lookup the column) so any repeater short descriptions should be no more than 32 characters when the repeat number is added and spaces are removed e.g. ‘My repeater field 25’ (if my max repeaters is 25) which strips to ‘Myrepeaterfield25’ should be no longer than 32 characters.
 
 ## Configuration structure
 

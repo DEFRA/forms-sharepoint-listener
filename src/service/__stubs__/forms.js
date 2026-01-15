@@ -245,7 +245,7 @@ export const definitionForSharepointTest = buildDefinition({
         },
         schema: {
           min: 1,
-          max: 5
+          max: 15
         }
       }
     },

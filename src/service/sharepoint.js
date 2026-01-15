@@ -209,11 +209,21 @@ export async function saveToSharepointList(message) {
 
     if (hasRepeater(component.page.pageDef)) {
       const repeaterName = component.page.pageDef.repeat.options.name
+      const maxRepeaterItems = /** @type {number} */ (
+        component.page.pageDef.repeat.schema.max
+      )
       const hasRepeaterData = repeaterName in data.repeaters
       const items = hasRepeaterData ? data.repeaters[repeaterName] : []
 
       for (let index = 0; index < items.length; index++) {
         const value = getValue(items[index], key, component)
+        const baseComponentKey = getSharepointFieldName(component)
+        if (baseComponentKey.length + `${maxRepeaterItems}`.length > 32) {
+          throw new Error(
+            `Repeater columns plus number index cannot be longer than 32 characters (with spaces stripped) - shortDesc: ${baseComponentKey}${maxRepeaterItems} formId: ${formId}`
+          )
+        }
+
         const componentKey = `${getSharepointFieldName(component)}${index + 1}`
 
         fields.set(componentKey, value)
