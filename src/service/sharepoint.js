@@ -224,7 +224,7 @@ export async function saveToSharepointList(message) {
           )
         }
 
-        const componentKey = `${getSharepointFieldName(component)}${index + 1}`
+        const componentKey = `${baseComponentKey}${index + 1}`
 
         fields.set(componentKey, value)
       }
