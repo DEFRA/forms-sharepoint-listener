@@ -67,6 +67,12 @@ A valid config value which allow two different forms to write to two different S
 {"mappings":[{"formId":"695e4ec0e57ae17190adacba","siteId":"071a12a4-5ed0-4a08-bbf6-93a762e89bdb","listId":"0695483b-f344-419f-bc93-ee8aeee1b788","status":"draft"},{"formId":"696104cfab2e01c384cf6382","siteId":"071a12a4-5ed0-4a08-bbf6-93a762e89bdb","listId":"69c339f4-5c06-42ab-89f9-7db121c61fc3","status":"live"}]}
 ```
 
+## Renaming a Sharepoint column
+
+Although you can rename a Sharepoint column name (for example if you change a question’s short description), the original ‘internal’ Sharepoint column name remains. All you are doing by renaming the Sharepoint column is changing the display name.
+
+So if you need to change a Sharepoint column name to match a question’s short description, you will have to add a new column with the correct name, copy over any data from the original column, then delete the original column.
+
 ## Determining the siteId and listId of a Sharepoint list
 
 Normally a Sharepoint list is referred to by a url containing its site name and list name e.g. https://defradev.sharepoint.com/teams/TEAM164UAT/Lists/TestList1/AllItems.aspx
