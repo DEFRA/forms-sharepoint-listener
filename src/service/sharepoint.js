@@ -103,13 +103,13 @@ export function coerceDataValue(asText, component) {
  */
 export function componentValueMapper(component, value) {
   if (component.type === ComponentType.EastingNorthingField) {
-    return 'easting' in value && 'northing' in value
+    return value && 'easting' in value && 'northing' in value
       ? `Easting: ${value.easting}, Northing: ${value.northing}`
       : ''
   }
 
   if (component.type === ComponentType.MonthYearField) {
-    if ('year' in value && 'month' in value) {
+    if (value && 'year' in value && 'month' in value) {
       const { month, year } = value
       const monthStr = month < 10 ? `0${month}` : month.toString()
       return `${year}/${monthStr}`
