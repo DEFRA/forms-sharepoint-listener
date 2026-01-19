@@ -86,9 +86,7 @@ export function escapeFieldName(name) {
  */
 export function coerceDataValue(asText, component) {
   if (asText) {
-    if (
-      component.type === ComponentType.DatePartsField
-    ) {
+    if (component.type === ComponentType.DatePartsField) {
       return new Date(asText)
     }
     if (component.type === ComponentType.NumberField) {
@@ -108,10 +106,12 @@ export function componentValueMapper(component, value) {
     return 'easting' in value && 'northing' in value
       ? `Easting: ${value.easting}, Northing: ${value.northing}`
       : ''
-  } else if (component.type === ComponentType.MonthYearField) {
+  }
+
+  if (component.type === ComponentType.MonthYearField) {
     if ('year' in value && 'month' in value) {
       const { month, year } = value
-      const monthStr = month < 10 ? `0${month}`: month.toString()
+      const monthStr = month < 10 ? `0${month}` : month.toString()
       return `${year}/${monthStr}`
     }
     return ''
@@ -151,6 +151,30 @@ export function createMapOfComponentNameToShortDesc(definition) {
       ])
     })
   )
+}
+
+/**
+ * @param {FormDefinition} definition
+ * @param {FormAdapterSubmissionMessage} message
+ * @param {Map<string, CellValue >} fields
+ */
+export function addBaseFields(definition, message, fields) {
+  // Add submission date
+  fields.set(escapeFieldName('Submission date'), message.meta.timestamp)
+
+  // Add submission type
+  fields.set(
+    escapeFieldName('Submission type'),
+    message.meta.isPreview ? 'Preview' : 'Real'
+  )
+
+  // Add reference number (if enabled)
+  if (definition.options?.showReferenceNumber) {
+    fields.set(
+      escapeFieldName('Reference number'),
+      message.meta.referenceNumber
+    )
+  }
 }
 
 /**
@@ -213,19 +237,8 @@ export async function saveToSharepointList(message) {
   /** @type {Map<string, CellValue >} */
   const fields = new Map()
 
-  // Add submission date
-  fields.set(escapeFieldName('Submission date'), message.meta.timestamp)
-
-  // Add submission type
-  fields.set(
-    escapeFieldName('Submission type'),
-    message.meta.isPreview ? 'Preview' : 'Real'
-  )
-
-  // Add reference number (if enabled)
-  if (definition.options?.showReferenceNumber) {
-    fields.set(escapeFieldName('Reference number'), message.meta.referenceNumber)
-  }
+  // Add base fields
+  addBaseFields(definition, message, fields)
 
   formModel.componentMap.forEach((component, key) => {
     if (!component.isFormComponent) {
