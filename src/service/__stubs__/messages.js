@@ -37,6 +37,7 @@ line 3`,
       KDVPWv: 'Radio 1',
       JLyrSq: 'Autocomplete 2',
       ZjjIss: 'Select option 2',
+      aDDfeH: { easting: 12345, northing: 67890 },
       LNOPHF: 'true'
     },
     repeaters: {

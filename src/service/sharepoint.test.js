@@ -75,12 +75,13 @@ describe('sharepoint', () => {
           Checkboxesfield: 'Item 2',
           Datepartsfield: new Date(2026, 11, 12),
           Declarationquestion: 'I understand and agree',
+          Eastingandnorthing: 'Easting: 12345, Northing: 67890',
           Emailaddress: 'email1@testing.co.uk',
           Dateofbirth1: new Date(2000, 10, 1),
           Dateofbirth2: new Date(1990, 6, 21),
           Favouritefruit1: 'Apple',
           Favouritefruit2: 'Banana',
-          Monthandyear: new Date(2026, 9, 1),
+          Monthandyear: '2026/10',
           Multiline: `multiline line 1
 line 2
 line 3`,

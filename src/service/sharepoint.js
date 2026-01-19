@@ -87,8 +87,7 @@ export function escapeFieldName(name) {
 export function coerceDataValue(asText, component) {
   if (asText) {
     if (
-      component.type === ComponentType.DatePartsField ||
-      component.type === ComponentType.MonthYearField
+      component.type === ComponentType.DatePartsField
     ) {
       return new Date(asText)
     }
@@ -101,6 +100,24 @@ export function coerceDataValue(asText, component) {
 }
 
 /**
+ * @param {Component} component
+ * @param {any} value
+ */
+export function componentValueMapper(component, value) {
+  if (component.type === ComponentType.EastingNorthingField) {
+    return 'easting' in value && 'northing' in value
+      ? `Easting: ${value.easting}, Northing: ${value.northing}`
+      : ''
+  } else if (component.type === ComponentType.MonthYearField) {
+    return 'year' in value && 'month' in value
+      ? `${value.year}/${value.month}`
+      : ''
+  }
+
+  return component.getDisplayStringFromFormValue(value)
+}
+
+/**
  * Extracts the component value from the provided data and coerces to the appropriate type
  * @param {Record<string, any>} data - the answers data
  * @param {string} key - the component key (name)
@@ -109,7 +126,7 @@ export function coerceDataValue(asText, component) {
  */
 export function getValue(data, key, component) {
   const asText =
-    key in data ? component.getDisplayStringFromFormValue(data[key]) : undefined
+    key in data ? componentValueMapper(component, data[key]) : undefined
 
   return coerceDataValue(asText, component)
 }
@@ -201,6 +218,11 @@ export async function saveToSharepointList(message) {
     escapeFieldName('Submission type'),
     message.meta.isPreview ? 'Preview' : 'Real'
   )
+
+  // Add reference number (if enabled)
+  if (definition.options?.showReferenceNumber) {
+    fields.set(escapeFieldName('Reference number'), message.meta.referenceNumber)
+  }
 
   formModel.componentMap.forEach((component, key) => {
     if (!component.isFormComponent) {
