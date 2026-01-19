@@ -109,9 +109,12 @@ export function componentValueMapper(component, value) {
       ? `Easting: ${value.easting}, Northing: ${value.northing}`
       : ''
   } else if (component.type === ComponentType.MonthYearField) {
-    return 'year' in value && 'month' in value
-      ? `${value.year}/${value.month}`
-      : ''
+    if ('year' in value && 'month' in value) {
+      const { month, year } = value
+      const monthStr = month < 10 ? `0${month}`: month.toString()
+      return `${year}/${monthStr}`
+    }
+    return ''
   }
 
   return component.getDisplayStringFromFormValue(value)
