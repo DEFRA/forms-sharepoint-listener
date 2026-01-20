@@ -75,18 +75,99 @@ describe('sharepoint', () => {
           Checkboxesfield: 'Item 2',
           Datepartsfield: new Date(2026, 11, 12),
           Declarationquestion: 'I understand and agree',
+          Eastingandnorthing: 'Easting: 12345, Northing: 67890',
           Emailaddress: 'email1@testing.co.uk',
           Dateofbirth1: new Date(2000, 10, 1),
           Dateofbirth2: new Date(1990, 6, 21),
           Favouritefruit1: 'Apple',
           Favouritefruit2: 'Banana',
-          Monthandyear: new Date(2026, 9, 1),
+          Monthandyear: '2026/10',
           Multiline: `multiline line 1
 line 2
 line 3`,
           Number: 12345,
           Phonenumber: '+441234123456',
           Radiosfield: 'Radio 1',
+          Selectfield: 'Select option 2',
+          Submissiondate: new Date('2026-01-06T13:05:51.322Z'),
+          Submissiontype: 'Preview',
+          Textfield: 'John Smith',
+          UKaddressfield: '1 Test Street, Testington, TS1 1TS',
+          Yesorno: 'Yes',
+          Yourfile:
+            'http://host.docker.internal:3000/file-download/02ce8776-15b2-4b9c-93a4-e7821cf7cc34 \r\nhttp://host.docker.internal:3000/file-download/a94cf9e6-122a-41cc-b8c2-2e34df800e92'
+        }
+      })
+    })
+
+    it('should construct correct data from message to send to sharepoint - some fields empty', async () => {
+      jest
+        .mocked(getFormDefinition)
+        .mockResolvedValue(definitionForSharepointTest)
+      const message = structuredClone(messageForSharepointTest)
+      message.meta.formId = 'my-form-id'
+      message.data.main.aDDfeH = undefined
+      message.data.main.GesUIU = undefined
+
+      await saveToSharepointList(message)
+      expect(mockClientPostCall).toHaveBeenCalledWith({
+        fields: {
+          Autocompletefield: 'Autocomplete 2',
+          Checkboxesfield: 'Item 2',
+          Datepartsfield: new Date(2026, 11, 12),
+          Declarationquestion: 'I understand and agree',
+          Eastingandnorthing: '',
+          Emailaddress: 'email1@testing.co.uk',
+          Dateofbirth1: new Date(2000, 10, 1),
+          Dateofbirth2: new Date(1990, 6, 21),
+          Favouritefruit1: 'Apple',
+          Favouritefruit2: 'Banana',
+          Monthandyear: '',
+          Multiline: `multiline line 1
+line 2
+line 3`,
+          Number: 12345,
+          Phonenumber: '+441234123456',
+          Radiosfield: 'Radio 1',
+          Selectfield: 'Select option 2',
+          Submissiondate: new Date('2026-01-06T13:05:51.322Z'),
+          Submissiontype: 'Preview',
+          Textfield: 'John Smith',
+          UKaddressfield: '1 Test Street, Testington, TS1 1TS',
+          Yesorno: 'Yes',
+          Yourfile:
+            'http://host.docker.internal:3000/file-download/02ce8776-15b2-4b9c-93a4-e7821cf7cc34 \r\nhttp://host.docker.internal:3000/file-download/a94cf9e6-122a-41cc-b8c2-2e34df800e92'
+        }
+      })
+    })
+
+    it('should construct correct data from message including reference number', async () => {
+      const definitionWithRefNum = structuredClone(definitionForSharepointTest)
+      definitionWithRefNum.options = { showReferenceNumber: true }
+      jest.mocked(getFormDefinition).mockResolvedValue(definitionWithRefNum)
+      const message = structuredClone(messageForSharepointTest)
+      message.meta.formId = 'my-form-id'
+      await saveToSharepointList(message)
+      expect(mockClientPostCall).toHaveBeenCalledWith({
+        fields: {
+          Autocompletefield: 'Autocomplete 2',
+          Checkboxesfield: 'Item 2',
+          Datepartsfield: new Date(2026, 11, 12),
+          Declarationquestion: 'I understand and agree',
+          Eastingandnorthing: 'Easting: 12345, Northing: 67890',
+          Emailaddress: 'email1@testing.co.uk',
+          Dateofbirth1: new Date(2000, 10, 1),
+          Dateofbirth2: new Date(1990, 6, 21),
+          Favouritefruit1: 'Apple',
+          Favouritefruit2: 'Banana',
+          Monthandyear: '2026/10',
+          Multiline: `multiline line 1
+line 2
+line 3`,
+          Number: 12345,
+          Phonenumber: '+441234123456',
+          Radiosfield: 'Radio 1',
+          Referencenumber: '64C-345-5E6',
           Selectfield: 'Select option 2',
           Submissiondate: new Date('2026-01-06T13:05:51.322Z'),
           Submissiontype: 'Preview',

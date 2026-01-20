@@ -170,6 +170,17 @@ export const definitionForSharepointTest = buildDefinition({
           id: 'bd283d1f-1e3d-437f-acab-42946bd369c0'
         },
         {
+          type: ComponentType.EastingNorthingField,
+          title: 'Easting and northing',
+          name: 'aDDfeH',
+          shortDescription: 'Easting and northing',
+          hint: '',
+          options: {
+            required: true
+          },
+          id: 'a3c3a2d5-c435-419b-a59c-cc4afc6c310c'
+        },
+        {
           type: ComponentType.DeclarationField,
           title: 'Declaration question',
           name: 'LNOPHF',

@@ -86,10 +86,7 @@ export function escapeFieldName(name) {
  */
 export function coerceDataValue(asText, component) {
   if (asText) {
-    if (
-      component.type === ComponentType.DatePartsField ||
-      component.type === ComponentType.MonthYearField
-    ) {
+    if (component.type === ComponentType.DatePartsField) {
       return new Date(asText)
     }
     if (component.type === ComponentType.NumberField) {
@@ -101,6 +98,29 @@ export function coerceDataValue(asText, component) {
 }
 
 /**
+ * @param {Component} component
+ * @param {any} value
+ */
+export function componentValueMapper(component, value) {
+  if (component.type === ComponentType.EastingNorthingField) {
+    return value && 'easting' in value && 'northing' in value
+      ? `Easting: ${value.easting}, Northing: ${value.northing}`
+      : ''
+  }
+
+  if (component.type === ComponentType.MonthYearField) {
+    if (value && 'year' in value && 'month' in value) {
+      const { month, year } = value
+      const monthStr = month < 10 ? `0${month}` : month.toString()
+      return `${year}/${monthStr}`
+    }
+    return ''
+  }
+
+  return component.getDisplayStringFromFormValue(value)
+}
+
+/**
  * Extracts the component value from the provided data and coerces to the appropriate type
  * @param {Record<string, any>} data - the answers data
  * @param {string} key - the component key (name)
@@ -109,7 +129,7 @@ export function coerceDataValue(asText, component) {
  */
 export function getValue(data, key, component) {
   const asText =
-    key in data ? component.getDisplayStringFromFormValue(data[key]) : undefined
+    key in data ? componentValueMapper(component, data[key]) : undefined
 
   return coerceDataValue(asText, component)
 }
@@ -131,6 +151,30 @@ export function createMapOfComponentNameToShortDesc(definition) {
       ])
     })
   )
+}
+
+/**
+ * @param {FormDefinition} definition
+ * @param {FormAdapterSubmissionMessage} message
+ * @param {Map<string, CellValue >} fields
+ */
+export function addBaseFields(definition, message, fields) {
+  // Add submission date
+  fields.set(escapeFieldName('Submission date'), message.meta.timestamp)
+
+  // Add submission type
+  fields.set(
+    escapeFieldName('Submission type'),
+    message.meta.isPreview ? 'Preview' : 'Real'
+  )
+
+  // Add reference number (if enabled)
+  if (definition.options?.showReferenceNumber) {
+    fields.set(
+      escapeFieldName('Reference number'),
+      message.meta.referenceNumber
+    )
+  }
 }
 
 /**
@@ -193,14 +237,8 @@ export async function saveToSharepointList(message) {
   /** @type {Map<string, CellValue >} */
   const fields = new Map()
 
-  // Add submission date
-  fields.set(escapeFieldName('Submission date'), message.meta.timestamp)
-
-  // Add submission type
-  fields.set(
-    escapeFieldName('Submission type'),
-    message.meta.isPreview ? 'Preview' : 'Real'
-  )
+  // Add base fields
+  addBaseFields(definition, message, fields)
 
   formModel.componentMap.forEach((component, key) => {
     if (!component.isFormComponent) {
