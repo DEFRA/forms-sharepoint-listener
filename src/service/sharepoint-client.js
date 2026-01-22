@@ -11,7 +11,7 @@ const proxyUrlConfig = /** @type { string | null } */ (config.get('httpProxy'))
 const proxyUrl = proxyUrlConfig
   ? new URL(proxyUrlConfig)
   : new URL('http://localhost:8010')
-const proxyPort = parseInt(proxyUrl.port)
+const proxyPort = Number.parseInt(proxyUrl.port)
 const proxyOptionsBlock = proxyUrlConfig
   ? {
       proxyOptions: {

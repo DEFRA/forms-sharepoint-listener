@@ -18,6 +18,10 @@ describe('sharepoint client', () => {
     it('should return client when no proxy configured', () => {
       const client = getGraphClient()
       expect(client).toBeDefined()
+      // @ts-expect-error - config is private
+      expect(client.config.fetchOptions).not.toEqual({})
+      // @ts-expect-error - config is private
+      expect(client.config.fetchOptions.dispatcher).toBeDefined()
     })
   })
 })
