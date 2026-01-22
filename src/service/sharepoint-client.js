@@ -10,15 +10,13 @@ const sharepointConfig = config.get('sharepoint')
 const proxyUrlConfig = /** @type { string | null } */ (config.get('httpProxy'))
 const proxyUrl = proxyUrlConfig
   ? new URL(proxyUrlConfig)
-  : new URL('http://localhost')
-// The url.protocol value always has a colon at the end
-const port = proxyUrl.protocol.toLowerCase() === 'http:' ? 80 : 443
-
+  : new URL('http://localhost:8010')
+const proxyPort = parseInt(proxyUrl.port)
 const proxyOptionsBlock = proxyUrlConfig
   ? {
       proxyOptions: {
         host: proxyUrl.href,
-        port
+        port: proxyPort
       }
     }
   : {}
