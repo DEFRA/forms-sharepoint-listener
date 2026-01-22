@@ -97,7 +97,7 @@ export const config = convict({
     format: String,
     nullable: true,
     default: null,
-    env: 'HTTP_PROXY'
+    env: 'CDP_HTTP_PROXY'
   },
   httpsProxy: {
     doc: 'HTTPS Proxy',
