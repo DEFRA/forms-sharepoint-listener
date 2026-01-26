@@ -8,34 +8,46 @@ import { config } from '~/src/config/index.js'
 const sharepointConfig = config.get('sharepoint')
 
 const proxyUrlConfig = /** @type { string | null } */ (config.get('httpProxy'))
-const proxyUrl = proxyUrlConfig
-  ? new URL(proxyUrlConfig)
-  : new URL('http://localhost:8010')
-const proxyPort = Number.parseInt(proxyUrl.port)
-const proxyOptionsBlock = proxyUrlConfig
-  ? {
-      proxyOptions: {
-        host: proxyUrl.href,
-        port: proxyPort
-      }
-    }
-  : {}
 
-const fetchOptionsBlock = proxyUrlConfig
-  ? /** @type {FetchOptions} */ ({
-      dispatcher: new ProxyAgent({
-        uri: proxyUrlConfig,
-        keepAliveTimeout: 10,
-        keepAliveMaxTimeout: 10
+/**
+ * @param {string | null} proxyConfig - proxy url from config
+ * @returns {{ proxyOptions: { host: string, port: number }} | undefined }
+ */
+function getProxy(proxyConfig) {
+  if (!proxyConfig) {
+    return undefined
+  }
+  const proxyUrl = new URL(proxyConfig)
+  const port = Number.parseInt(proxyUrl.port)
+  return {
+    proxyOptions: {
+      host: proxyUrl.href,
+      port
+    }
+  }
+}
+
+/**
+ * @param {string | null} proxyConfig - proxy url from config
+ * @returns {FetchOptions} | {} }
+ */
+function getFetchOptions(proxyConfig) {
+  return proxyConfig
+    ? /** @type {FetchOptions} */ ({
+        dispatcher: new ProxyAgent({
+          uri: proxyConfig,
+          keepAliveTimeout: 10,
+          keepAliveMaxTimeout: 10
+        })
       })
-    })
-  : {}
+    : {}
+}
 
 const credential = new ClientSecretCredential(
   sharepointConfig.tenantId,
   sharepointConfig.clientId,
   sharepointConfig.clientSecret,
-  proxyOptionsBlock
+  getProxy(proxyUrlConfig)
 )
 
 const authProvider = new TokenCredentialAuthenticationProvider(credential, {
@@ -49,7 +61,7 @@ const authProvider = new TokenCredentialAuthenticationProvider(credential, {
 export function getGraphClient() {
   return Client.initWithMiddleware({
     authProvider,
-    fetchOptions: fetchOptionsBlock
+    fetchOptions: getFetchOptions(proxyUrlConfig)
   })
 }
 
