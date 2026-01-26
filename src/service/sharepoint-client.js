@@ -7,7 +7,7 @@ import { config } from '~/src/config/index.js'
 
 const sharepointConfig = config.get('sharepoint')
 
-const proxyUrlConfig = /** @type { string | null } */ (config.get('httpProxy'))
+const proxyUrlConfig = /** @type { string | null } */ (config.get('httpsProxy'))
 
 /**
  * @param {string | null} proxyConfig - proxy url from config
