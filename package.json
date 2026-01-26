@@ -40,7 +40,7 @@
     "@hapi/hoek": "^11.0.7",
     "@hapi/jwt": "3.2.1",
     "@microsoft/microsoft-graph-client": "^3.0.7",
-    "aws-embedded-metrics": "4.2.0",
+    "aws-embedded-metrics": "4.2.1",
     "aws4": "^1.13.2",
     "convict": "^6.2.4",
     "convict-format-with-validator": "6.2.0",
