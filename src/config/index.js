@@ -103,7 +103,7 @@ export const config = convict({
     doc: 'HTTPS Proxy',
     format: String,
     default: '',
-    env: 'CDP_HTTPS_PROXY'
+    env: 'HTTPS_PROXY'
   },
 
   sharepoint: {
