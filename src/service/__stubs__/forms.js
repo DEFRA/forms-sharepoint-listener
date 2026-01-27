@@ -261,6 +261,26 @@ export const definitionForSharepointTest = buildDefinition({
       }
     },
     {
+      title: 'Payment page',
+      path: '/payment',
+      components: [
+        {
+          type: ComponentType.PaymentField,
+          title: 'Payment field',
+          name: 'xFggEW',
+          shortDescription: 'Payment',
+          hint: '',
+          options: {
+            description: 'Pay for your licence',
+            amount: 150
+          },
+          id: '382c80b3-eee8-48c5-bae5-16ff11634b01'
+        }
+      ],
+      next: [],
+      id: '5bb3030d-cf73-4184-a6c8-7478b7768153'
+    },
+    {
       id: '449a45f6-4541-4a46-91bd-8b8931b07b50',
       title: '',
       path: '/summary',
