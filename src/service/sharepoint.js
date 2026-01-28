@@ -182,7 +182,9 @@ export function addBaseFields(definition, message, fields) {
  * @param {Map<string, CellValue>} fields
  */
 export function addPaymentFields(message, fields) {
-  const payment = /** @type {FormAdapterPayment | undefined} */ (Object.values(message.data.payments)[0])
+  const payment = /** @type {FormAdapterPayment | undefined} */ (
+    Object.values(message.data.payments)[0]
+  )
 
   if (!payment) {
     return

@@ -63,7 +63,7 @@ line 3`,
       ]
     },
     payments: {
-      'payPAY': {
+      payPAY: {
         paymentId: 'payment-id',
         reference: 'payment-ref',
         amount: 150,
