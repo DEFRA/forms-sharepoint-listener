@@ -179,13 +179,13 @@ export function addBaseFields(definition, message, fields) {
 
 /**
  * @param {FormAdapterSubmissionMessage} message
- * @param {Map<string, CellValue >} fields
+ * @param {Map<string, CellValue>} fields
  */
 export function addPaymentFields(message, fields) {
-  const payment = Object.values(message.data.payments ?? {})[0]
+  const payment = /** @type {FormAdapterPayment | undefined} */ (Object.values(message.data.payments)[0])
 
   if (!payment) {
-    return undefined
+    return
   }
 
   // Add payment description
@@ -317,6 +317,6 @@ export async function saveToSharepointList(message) {
 
 /**
  * @import { FormDefinition, FormStatus } from '@defra/forms-model'
- * @import { FormAdapterSubmissionMessage, FormAdapterSubmissionMessageData, FormAdapterSubmissionMessageMeta } from '@defra/forms-engine-plugin/engine/types.js'
+ * @import { FormAdapterPayment, FormAdapterSubmissionMessage, FormAdapterSubmissionMessageMeta } from '@defra/forms-engine-plugin/engine/types.js'
  * @import { Component } from '@defra/forms-engine-plugin/engine/components/helpers/components.js'
  */
