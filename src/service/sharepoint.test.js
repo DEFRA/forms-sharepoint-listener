@@ -267,7 +267,7 @@ line 3`,
       /** @type {Map<string, CellValue >} */
       const fields = new Map()
       const message = structuredClone(messageForSharepointTest)
-      message.data.payments = {}
+      message.data.payment = undefined
       addPaymentFields(message, fields)
       const fieldsArray = Array.from(fields.entries())
       expect(fieldsArray).toEqual([])

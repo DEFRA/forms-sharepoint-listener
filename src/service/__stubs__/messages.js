@@ -62,14 +62,12 @@ line 3`,
         }
       ]
     },
-    payments: {
-      payPAY: {
-        paymentId: 'payment-id',
-        reference: 'payment-ref',
-        amount: 150,
-        description: 'payment description',
-        createdAt: '2026-01-26T14:30:00.000Z'
-      }
+    payment: {
+      paymentId: 'payment-id',
+      reference: 'payment-ref',
+      amount: 150,
+      description: 'payment description',
+      createdAt: '2026-01-26T14:30:00.000Z'
     }
   },
   result: {

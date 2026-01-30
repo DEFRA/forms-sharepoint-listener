@@ -94,7 +94,6 @@ export function buildFormAdapterSubmissionMessageData(
     },
     repeaters: {},
     files: {},
-    payments: {},
     ...partialFormAdapterSubmissionMessageData
   }
 }
