@@ -61,6 +61,13 @@ line 3`,
             'http://host.docker.internal:3000/file-download/a94cf9e6-122a-41cc-b8c2-2e34df800e92'
         }
       ]
+    },
+    payment: {
+      paymentId: 'payment-id',
+      reference: 'payment-ref',
+      amount: 150,
+      description: 'payment description',
+      createdAt: '2026-01-26T14:30:00.000Z'
     }
   },
   result: {

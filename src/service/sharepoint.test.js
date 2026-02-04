@@ -3,6 +3,7 @@ import { definitionForSharepointTest } from '~/src/service/__stubs__/forms.js'
 import { messageForSharepointTest } from '~/src/service/__stubs__/messages.js'
 import {
   addItemsByFieldName,
+  addPaymentFields,
   escapeFieldName,
   loadFormMappings,
   saveToSharepointList
@@ -86,6 +87,10 @@ describe('sharepoint', () => {
 line 2
 line 3`,
           Number: 12345,
+          Paymentamount: 150,
+          Paymentdate: '2026-01-26T14:30:00.000Z',
+          Paymentdescription: 'payment description',
+          Paymentreference: 'payment-ref',
           Phonenumber: '+441234123456',
           Radiosfield: 'Radio 1',
           Selectfield: 'Select option 2',
@@ -127,6 +132,10 @@ line 3`,
 line 2
 line 3`,
           Number: 12345,
+          Paymentamount: 150,
+          Paymentdate: '2026-01-26T14:30:00.000Z',
+          Paymentdescription: 'payment description',
+          Paymentreference: 'payment-ref',
           Phonenumber: '+441234123456',
           Radiosfield: 'Radio 1',
           Selectfield: 'Select option 2',
@@ -165,6 +174,10 @@ line 3`,
 line 2
 line 3`,
           Number: 12345,
+          Paymentamount: 150,
+          Paymentdate: '2026-01-26T14:30:00.000Z',
+          Paymentdescription: 'payment description',
+          Paymentreference: 'payment-ref',
           Phonenumber: '+441234123456',
           Radiosfield: 'Radio 1',
           Referencenumber: '64C-345-5E6',
@@ -236,8 +249,33 @@ line 3`,
       )
     })
   })
+
+  describe('addPaymentFields', () => {
+    it('should add payment fields', () => {
+      /** @type {Map<string, CellValue >} */
+      const fields = new Map()
+      addPaymentFields(messageForSharepointTest, fields)
+      const fieldsArray = Array.from(fields.entries())
+      expect(fieldsArray).toEqual([
+        ['Paymentdescription', 'payment description'],
+        ['Paymentamount', 150],
+        ['Paymentreference', 'payment-ref'],
+        ['Paymentdate', '2026-01-26T14:30:00.000Z']
+      ])
+    })
+    it('should ignore if no payment fields', () => {
+      /** @type {Map<string, CellValue >} */
+      const fields = new Map()
+      const message = structuredClone(messageForSharepointTest)
+      message.data.payment = undefined
+      addPaymentFields(message, fields)
+      const fieldsArray = Array.from(fields.entries())
+      expect(fieldsArray).toEqual([])
+    })
+  })
 })
 
 /**
  * @import { PageQuestion, TextFieldComponent } from '@defra/forms-model'
+ * @import { CellValue } from '~/src/service/sharepoint.js'
  */

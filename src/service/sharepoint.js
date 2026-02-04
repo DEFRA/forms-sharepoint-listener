@@ -178,6 +178,30 @@ export function addBaseFields(definition, message, fields) {
 }
 
 /**
+ * @param {FormAdapterSubmissionMessage} message
+ * @param {Map<string, CellValue>} fields
+ */
+export function addPaymentFields(message, fields) {
+  const payment = message.data.payment
+
+  if (!payment) {
+    return
+  }
+
+  // Add payment description
+  fields.set(escapeFieldName('Payment description'), payment.description)
+
+  // Add payment amount
+  fields.set(escapeFieldName('Payment amount'), payment.amount)
+
+  // Add payment reference
+  fields.set(escapeFieldName('Payment reference'), payment.reference)
+
+  // Add payment date
+  fields.set(escapeFieldName('Payment date'), payment.createdAt)
+}
+
+/**
  * Adds items to a SharePoint list
  * @param {string} siteId - id of the site
  * @param {string} listId - id of the list
@@ -273,6 +297,8 @@ export async function saveToSharepointList(message) {
         : ''
 
       fields.set(getSharepointFieldName(component), fileLinks)
+    } else if (component.type === ComponentType.PaymentField) {
+      addPaymentFields(message, fields)
     } else {
       const value = getValue(data.main, key, component)
 
