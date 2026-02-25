@@ -5,6 +5,7 @@ import {
   addItemsByFieldName,
   addPaymentFields,
   loadFormMappings,
+  mapFieldNames,
   saveToSharepointList
 } from '~/src/service/sharepoint.js'
 
@@ -361,9 +362,21 @@ line 3`,
       expect(fieldsArray).toEqual([])
     })
   })
+
+  describe('mapFieldNames', () => {
+    it('should throw if field name not found', () => {
+      const fields = new Map()
+      fields.set('field 1', 'val1')
+      fields.set('field 2', 'val2')
+      fields.set('field 3', 'val3')
+      const mapOfNames = new Map()
+      mapOfNames.set('field 1', 'field1')
+      mapOfNames.set('field 3', 'field3')
+      expect(() => mapFieldNames(fields, mapOfNames)).toThrow('Internal name not found for display name \'field 2\'')
+    })
+  })
 })
 
 /**
- * @import { PageQuestion, TextFieldComponent } from '@defra/forms-model'
  * @import { CellValue } from '~/src/service/sharepoint.js'
  */
