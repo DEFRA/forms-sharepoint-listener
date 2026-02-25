@@ -1,4 +1,5 @@
 import { buildMonthYearFieldComponent } from '@defra/forms-model/stubs'
+
 import { getFormDefinition } from '~/src/lib/manager.js'
 import { definitionForSharepointTest } from '~/src/service/__stubs__/forms.js'
 import { messageForSharepointTest } from '~/src/service/__stubs__/messages.js'
@@ -374,7 +375,9 @@ line 3`,
       const mapOfNames = new Map()
       mapOfNames.set('field 1', 'field1')
       mapOfNames.set('field 3', 'field3')
-      expect(() => mapFieldNames(fields, mapOfNames)).toThrow('Internal name not found for display name \'field 2\'')
+      expect(() => mapFieldNames(fields, mapOfNames)).toThrow(
+        "Internal name not found for display name 'field 2'"
+      )
     })
   })
 
