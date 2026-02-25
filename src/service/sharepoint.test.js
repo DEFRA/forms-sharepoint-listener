@@ -4,7 +4,6 @@ import { messageForSharepointTest } from '~/src/service/__stubs__/messages.js'
 import {
   addItemsByFieldName,
   addPaymentFields,
-  escapeFieldName,
   loadFormMappings,
   saveToSharepointList
 } from '~/src/service/sharepoint.js'
@@ -18,11 +17,123 @@ jest.mock('~/src/helpers/logging/logger.js', () => ({
 }))
 jest.mock('~/src/lib/manager.js')
 
+const fieldNameMappings = [
+  {
+    name: 'Autocompletefield',
+    displayName: 'Autocomplete field'
+  },
+  {
+    name: 'Checkboxesfield',
+    displayName: 'Checkboxes field'
+  },
+  {
+    name: 'Dateofbirth1',
+    displayName: 'Date of birth 1'
+  },
+  {
+    name: 'Dateofbirth2',
+    displayName: 'Date of birth 2'
+  },
+  {
+    name: 'Datepartsfield',
+    displayName: 'Date parts field'
+  },
+  {
+    name: 'Declarationquestion',
+    displayName: 'Declaration question'
+  },
+  {
+    name: 'Eastingandnorthing',
+    displayName: 'Easting and northing'
+  },
+  {
+    name: 'Emailaddress',
+    displayName: 'Email address'
+  },
+  {
+    name: 'Favouritefruit1',
+    displayName: 'Favourite fruit 1'
+  },
+  {
+    name: 'Favouritefruit2',
+    displayName: 'Favourite fruit 2'
+  },
+  {
+    name: 'Monthandyear',
+    displayName: 'Month and year'
+  },
+  {
+    name: 'Multiline',
+    displayName: 'Multiline'
+  },
+  {
+    name: 'Number',
+    displayName: 'Number'
+  },
+  {
+    name: 'Paymentamount',
+    displayName: 'Payment amount'
+  },
+  {
+    name: 'Paymentdate',
+    displayName: 'Payment date'
+  },
+  {
+    name: 'Paymentdescription',
+    displayName: 'Payment description'
+  },
+  {
+    name: 'Paymentreference',
+    displayName: 'Payment reference'
+  },
+  {
+    name: 'Phonenumber',
+    displayName: 'Phone number'
+  },
+  {
+    name: 'Radiosfield',
+    displayName: 'Radios field'
+  },
+  {
+    name: 'Referencenumber',
+    displayName: 'Reference number'
+  },
+  {
+    name: 'Selectfield',
+    displayName: 'Select field'
+  },
+  {
+    name: 'Submissiondate',
+    displayName: 'Submission date'
+  },
+  {
+    name: 'Submissiontype',
+    displayName: 'Submission type'
+  },
+  {
+    name: 'Textfield',
+    displayName: 'Text field'
+  },
+  {
+    name: 'UKaddressfield',
+    displayName: 'UK address field'
+  },
+  {
+    name: 'Yesorno',
+    displayName: 'Yes or no'
+  },
+  {
+    name: 'Yourfile',
+    displayName: 'Your file'
+  }
+]
+
 const mockClientPostCall = jest.fn()
 jest.mock('~/src/service/sharepoint-client.js', () => {
   const mockClientApiCall = {
     post: (/** @type {Map<string, string>} */ fields) =>
-      mockClientPostCall(fields)
+      mockClientPostCall(fields),
+    get: () => Promise.resolve({ value: fieldNameMappings })
   }
   const mockClientApi = {
     api: () => mockClientApiCall
@@ -192,29 +303,6 @@ line 3`,
         }
       })
     })
-
-    it('should throw if repeater name will blow limits', async () => {
-      const definition = structuredClone(definitionForSharepointTest)
-      const page = /** @type {PageQuestion} */ (definition.pages[2])
-      const component = /** @type {TextFieldComponent} */ (page.components[0])
-      component.shortDescription = 'Repeater Name That Is Too Long Herexx'
-      jest.mocked(getFormDefinition).mockResolvedValue(definition)
-      const message = structuredClone(messageForSharepointTest)
-      message.meta.formId = 'my-form-id'
-      await expect(() => saveToSharepointList(message)).rejects.toThrow(
-        'Repeater columns plus number index cannot be longer than 32 characters (with spaces stripped) - shortDesc: RepeaterNameThatIsTooLongHerexx15 formId: my-form-id'
-      )
-    })
-  })
-
-  describe('escapeFieldName', () => {
-    it('should translate name as appropriate', () => {
-      expect(escapeFieldName(undefined)).toBe('')
-      expect(escapeFieldName('')).toBe('')
-      expect(escapeFieldName('abc DEF')).toBe('abcDEF')
-      expect(escapeFieldName('abcd   GHI')).toBe('abcdGHI')
-      expect(escapeFieldName("abc-DE'F")).toBe('abc_x002d_DEF')
-    })
   })
 
   describe('loadFormMappings', () => {
@@ -257,10 +345,10 @@ line 3`,
       addPaymentFields(messageForSharepointTest, fields)
       const fieldsArray = Array.from(fields.entries())
       expect(fieldsArray).toEqual([
-        ['Paymentdescription', 'payment description'],
-        ['Paymentamount', 150],
-        ['Paymentreference', 'payment-ref'],
-        ['Paymentdate', '2026-01-26T14:30:00.000Z']
+        ['Payment description', 'payment description'],
+        ['Payment amount', 150],
+        ['Payment reference', 'payment-ref'],
+        ['Payment date', '2026-01-26T14:30:00.000Z']
       ])
     })
     it('should ignore if no payment fields', () => {
