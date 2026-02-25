@@ -1,9 +1,11 @@
+import { buildMonthYearFieldComponent } from '@defra/forms-model/stubs'
 import { getFormDefinition } from '~/src/lib/manager.js'
 import { definitionForSharepointTest } from '~/src/service/__stubs__/forms.js'
 import { messageForSharepointTest } from '~/src/service/__stubs__/messages.js'
 import {
   addItemsByFieldName,
   addPaymentFields,
+  componentValueMapper,
   loadFormMappings,
   mapFieldNames,
   saveToSharepointList
@@ -373,6 +375,14 @@ line 3`,
       mapOfNames.set('field 1', 'field1')
       mapOfNames.set('field 3', 'field3')
       expect(() => mapFieldNames(fields, mapOfNames)).toThrow('Internal name not found for display name \'field 2\'')
+    })
+  })
+
+  describe('componentValueMapper', () => {
+    it('should handle month requiring leading zero when Month/Year', () => {
+      const component = buildMonthYearFieldComponent()
+      const value = { year: 2026, month: 2 }
+      expect(componentValueMapper(component, value)).toBe('2026/02')
     })
   })
 })
