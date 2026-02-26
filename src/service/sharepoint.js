@@ -10,29 +10,14 @@ import { formMappingsSchema } from '~/src/config/form-mappings-schema.js'
 import { config } from '~/src/config/index.js'
 import { createLogger } from '~/src/helpers/logging/logger.js'
 import { getFormDefinition } from '~/src/lib/manager.js'
+import {
+  addItemsByFieldName,
+  getColumnPropertiesFromGraph
+} from '~/src/service/ms-graph.js'
 import { getGraphClient } from '~/src/service/sharepoint-client.js'
 
 const logger = createLogger()
 const graphClient = getGraphClient()
-
-/**
- * @typedef FormMapping
- * @property {string} siteId - guid for the sharepoint site
- * @property {string} listId - guid for the sharepoint list
- * @property {string} formId - guid for the form
- * @property {FormStatus} status - live or draft
- */
-
-/**
- * @typedef DateObject
- * @property {number} day - day of the month e.g. 21
- * @property {number} month - month of the year e.g. 7
- * @property {number} year - 4 digit year e.g. 2025
- */
-
-/**
- * @typedef { string | number | Date | undefined } CellValue
- */
 
 /**
  * Construct key for storing unique config row
@@ -65,17 +50,6 @@ const formMappings = loadFormMappings(config.get('sharepoint').formMappings)
 const allowedForms = new Map(
   formMappings.map((conf) => [getConfigKey(conf), conf])
 )
-
-/**
- * Strips spaces to match the name that Sharepoint would use internally for a field
- * NOTE - Sharepoint column names get truncated to max 32 characters
- * @param { string | undefined } name
- */
-export function escapeFieldName(name) {
-  const fullName =
-    name?.replaceAll(' ', '').replaceAll("'", '').replace('-', '_x002d_') ?? ''
-  return fullName.length < 32 ? fullName : fullName.substring(0, 32)
-}
 
 /**
  * Coerce the value from text if the component is a
@@ -121,6 +95,24 @@ export function componentValueMapper(component, value) {
 }
 
 /**
+ * Map display names to internal names (since Sharepoint only accepts internal names when using MS Graph)
+ * @param {Map<string, CellValue>} fields
+ * @param {Map<string, string>} dispNameToIntName
+ * @returns {Map<string, CellValue>}
+ */
+export function mapFieldNames(fields, dispNameToIntName) {
+  const mapped = new Map()
+  for (const [key, value] of fields.entries()) {
+    const internalName = dispNameToIntName.get(key)
+    if (!internalName) {
+      throw new Error(`Internal name not found for display name '${key}'`)
+    }
+    mapped.set(dispNameToIntName.get(key), value)
+  }
+  return mapped
+}
+
+/**
  * Extracts the component value from the provided data and coerces to the appropriate type
  * @param {Record<string, any>} data - the answers data
  * @param {string} key - the component key (name)
@@ -144,10 +136,8 @@ export function createMapOfComponentNameToShortDesc(definition) {
         ? page.components
         : []
       return pageWithComponents.map((comp) => [
-        comp.name,
-        escapeFieldName(
-          'shortDescription' in comp ? comp.shortDescription : comp.name
-        )
+        'shortDescription' in comp ? comp.name : '--missing-short-desc--',
+        'shortDescription' in comp ? comp.shortDescription?.trim() : ''
       ])
     })
   )
@@ -160,20 +150,14 @@ export function createMapOfComponentNameToShortDesc(definition) {
  */
 export function addBaseFields(definition, message, fields) {
   // Add submission date
-  fields.set(escapeFieldName('Submission date'), message.meta.timestamp)
+  fields.set('Submission date', message.meta.timestamp)
 
   // Add submission type
-  fields.set(
-    escapeFieldName('Submission type'),
-    message.meta.isPreview ? 'Preview' : 'Real'
-  )
+  fields.set('Submission type', message.meta.isPreview ? 'Preview' : 'Real')
 
   // Add reference number (if enabled)
   if (definition.options?.showReferenceNumber) {
-    fields.set(
-      escapeFieldName('Reference number'),
-      message.meta.referenceNumber
-    )
+    fields.set('Reference number', message.meta.referenceNumber)
   }
 }
 
@@ -189,28 +173,30 @@ export function addPaymentFields(message, fields) {
   }
 
   // Add payment description
-  fields.set(escapeFieldName('Payment description'), payment.description)
+  fields.set('Payment description', payment.description)
 
   // Add payment amount
-  fields.set(escapeFieldName('Payment amount'), payment.amount)
+  fields.set('Payment amount', payment.amount)
 
   // Add payment reference
-  fields.set(escapeFieldName('Payment reference'), payment.reference)
+  fields.set('Payment reference', payment.reference)
 
   // Add payment date
-  fields.set(escapeFieldName('Payment date'), payment.createdAt)
+  fields.set('Payment date', payment.createdAt)
 }
 
 /**
- * Adds items to a SharePoint list
+ * Gets list of column properties as a map (specifically display name and internal name) from a SharePoint list
  * @param {string} siteId - id of the site
  * @param {string} listId - id of the list
- * @param {Map<string, CellValue>} fields - record of field names and values
  */
-export function addItemsByFieldName(siteId, listId, fields) {
-  return graphClient.api(`/sites/${siteId}/lists/${listId}/items`).post({
-    fields: Object.fromEntries(fields)
-  })
+export async function createMapOfColumnNameMappings(siteId, listId) {
+  const columns = await getColumnPropertiesFromGraph(
+    graphClient,
+    siteId,
+    listId
+  )
+  return new Map((columns ?? []).map((col) => [col.displayName, col.name]))
 }
 
 /**
@@ -243,15 +229,10 @@ export async function saveToSharepointList(message) {
   const componentNameToShortDesc =
     createMapOfComponentNameToShortDesc(definition)
 
-  /**
-   * @param {Component} component
-   */
-  function getSharepointFieldName(component) {
-    return (
-      componentNameToShortDesc.get(component.name) ??
-      escapeFieldName(component.name)
-    )
-  }
+  const displayNameToInternalName = await createMapOfColumnNameMappings(
+    siteId,
+    listId
+  )
 
   const formModel = new FormModel(replaceCustomControllers(definition), {
     basePath: '',
@@ -271,22 +252,13 @@ export async function saveToSharepointList(message) {
 
     if (hasRepeater(component.page.pageDef)) {
       const repeaterName = component.page.pageDef.repeat.options.name
-      const maxRepeaterItems = /** @type {number} */ (
-        component.page.pageDef.repeat.schema.max
-      )
       const hasRepeaterData = repeaterName in data.repeaters
       const items = hasRepeaterData ? data.repeaters[repeaterName] : []
 
       for (let index = 0; index < items.length; index++) {
         const value = getValue(items[index], key, component)
-        const baseComponentKey = getSharepointFieldName(component)
-        if (baseComponentKey.length + `${maxRepeaterItems}`.length > 32) {
-          throw new Error(
-            `Repeater columns plus number index cannot be longer than 32 characters (with spaces stripped) - shortDesc: ${baseComponentKey}${maxRepeaterItems} formId: ${formId}`
-          )
-        }
-
-        const componentKey = `${baseComponentKey}${index + 1}`
+        const baseComponentKey = componentNameToShortDesc.get(component.name)
+        const componentKey = `${baseComponentKey} ${index + 1}`
 
         fields.set(componentKey, value)
       }
@@ -296,13 +268,13 @@ export async function saveToSharepointList(message) {
         ? files.map((f) => f.userDownloadLink).join(' \r\n')
         : ''
 
-      fields.set(getSharepointFieldName(component), fileLinks)
+      fields.set(componentNameToShortDesc.get(component.name) ?? '', fileLinks)
     } else if (component.type === ComponentType.PaymentField) {
       addPaymentFields(message, fields)
     } else {
       const value = getValue(data.main, key, component)
 
-      fields.set(getSharepointFieldName(component), value)
+      fields.set(componentNameToShortDesc.get(component.name) ?? '', value)
     }
   })
 
@@ -310,13 +282,15 @@ export async function saveToSharepointList(message) {
     `Constructed data for form id ${formId} - about to call Sharepoint`
   )
 
-  await addItemsByFieldName(siteId, listId, fields)
+  const mappedFields = mapFieldNames(fields, displayNameToInternalName)
+  await addItemsByFieldName(graphClient, siteId, listId, mappedFields)
 
   logger.info(`Saved successfully to Sharepoint for form id ${formId}`)
 }
 
 /**
- * @import { FormDefinition, FormStatus } from '@defra/forms-model'
+ * @import { FormDefinition } from '@defra/forms-model'
  * @import { FormAdapterSubmissionMessage, FormAdapterSubmissionMessageMeta } from '@defra/forms-engine-plugin/engine/types.js'
  * @import { Component } from '@defra/forms-engine-plugin/engine/components/helpers/components.js'
+ * @import { CellValue, FormMapping } from '~/src/service/sharepoint-types.js'
  */
