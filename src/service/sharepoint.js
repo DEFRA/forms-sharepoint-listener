@@ -10,29 +10,14 @@ import { formMappingsSchema } from '~/src/config/form-mappings-schema.js'
 import { config } from '~/src/config/index.js'
 import { createLogger } from '~/src/helpers/logging/logger.js'
 import { getFormDefinition } from '~/src/lib/manager.js'
+import {
+  addItemsByFieldName,
+  getColumnPropertiesFromGraph
+} from '~/src/service/ms-graph.js'
 import { getGraphClient } from '~/src/service/sharepoint-client.js'
 
 const logger = createLogger()
 const graphClient = getGraphClient()
-
-/**
- * @typedef FormMapping
- * @property {string} siteId - guid for the sharepoint site
- * @property {string} listId - guid for the sharepoint list
- * @property {string} formId - guid for the form
- * @property {FormStatus} status - live or draft
- */
-
-/**
- * @typedef DateObject
- * @property {number} day - day of the month e.g. 21
- * @property {number} month - month of the year e.g. 7
- * @property {number} year - 4 digit year e.g. 2025
- */
-
-/**
- * @typedef { string | number | Date | undefined } CellValue
- */
 
 /**
  * Construct key for storing unique config row
@@ -206,24 +191,12 @@ export function addPaymentFields(message, fields) {
  * @param {string} listId - id of the list
  */
 export async function createMapOfColumnNameMappings(siteId, listId) {
-  const response =
-    /** @type {{ value?: { displayName: string, name: string }[] }} */
-    (await graphClient.api(`/sites/${siteId}/lists/${listId}/columns`).get())
-  return new Map(
-    (response.value ?? []).map((col) => [col.displayName, col.name])
+  const columns = await getColumnPropertiesFromGraph(
+    graphClient,
+    siteId,
+    listId
   )
-}
-
-/**
- * Adds items to a SharePoint list
- * @param {string} siteId - id of the site
- * @param {string} listId - id of the list
- * @param {Map<string, CellValue>} fields - record of field names and values
- */
-export function addItemsByFieldName(siteId, listId, fields) {
-  return graphClient.api(`/sites/${siteId}/lists/${listId}/items`).post({
-    fields: Object.fromEntries(fields)
-  })
+  return new Map((columns ?? []).map((col) => [col.displayName, col.name]))
 }
 
 /**
@@ -310,13 +283,14 @@ export async function saveToSharepointList(message) {
   )
 
   const mappedFields = mapFieldNames(fields, displayNameToInternalName)
-  await addItemsByFieldName(siteId, listId, mappedFields)
+  await addItemsByFieldName(graphClient, siteId, listId, mappedFields)
 
   logger.info(`Saved successfully to Sharepoint for form id ${formId}`)
 }
 
 /**
- * @import { FormDefinition, FormStatus } from '@defra/forms-model'
+ * @import { FormDefinition } from '@defra/forms-model'
  * @import { FormAdapterSubmissionMessage, FormAdapterSubmissionMessageMeta } from '@defra/forms-engine-plugin/engine/types.js'
  * @import { Component } from '@defra/forms-engine-plugin/engine/components/helpers/components.js'
+ * @import { CellValue, FormMapping } from '~/src/service/sharepoint-types.js'
  */
