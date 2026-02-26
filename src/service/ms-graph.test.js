@@ -40,8 +40,8 @@ describe('ms-graph', () => {
       /** @type {Map<string, string>} */
       const fields = new Map()
       fields.set('field1', 'value1')
-      // @ts-expect-error - partial mock of client
       const res = await getColumnPropertiesFromGraph(
+        // @ts-expect-error - partial mock of client
         mockGraphClient,
         siteId,
         listId
