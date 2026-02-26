@@ -12,9 +12,7 @@ export async function getColumnPropertiesFromGraph(
   const response = await graphClient
     .api(`/sites/${siteId}/lists/${listId}/columns`)
     .get()
-  return /** @type {{ displayName: string, name: string }[] | undefined } */ (
-    response.value
-  )
+  return /** @type { SharepointColumn[] | undefined } */ (response.value)
 }
 
 /**
@@ -32,5 +30,5 @@ export function addItemsByFieldName(graphClient, siteId, listId, fields) {
 
 /**
  * @import { Client } from '@microsoft/microsoft-graph-client'
- * @import { CellValue } from '~/src/service/sharepoint-types.js'
+ * @import { CellValue, SharepointColumn } from '~/src/service/sharepoint-types.js'
  */

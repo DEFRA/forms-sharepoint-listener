@@ -52,6 +52,23 @@ const allowedForms = new Map(
 )
 
 /**
+ * @param {any} value
+ * @returns {string}
+ */
+export function getJsDatatype(value) {
+  if (typeof value === 'string') {
+    return 'string'
+  }
+  if (typeof value === 'number') {
+    return 'number'
+  }
+  if (value instanceof Date) {
+    return 'date'
+  }
+  return 'unknown'
+}
+
+/**
  * Coerce the value from text if the component is a
  * DatePartsField, MonthYearField or NumberField
  * @param {string | undefined} asText - the value as text
@@ -95,20 +112,56 @@ export function componentValueMapper(component, value) {
 }
 
 /**
+ * @param {Component} component
+ * @param {string} key
+ * @param {any} value
+ * @param {Map<string, { name: string, datatype: string }>} properties
+ */
+export function datatypeGuard(component, key, value, properties) {
+  if (!value) {
+    return
+  }
+
+  const jsDatatype = getJsDatatype(value)
+  const sharepointProp = properties.get(key)
+  if (
+    jsDatatype === 'number' &&
+    sharepointProp?.datatype === 'number' &&
+    component.type === ComponentType.NumberField
+  ) {
+    return
+  }
+  if (
+    jsDatatype === 'date' &&
+    sharepointProp?.datatype === 'date' &&
+    component.type === ComponentType.DatePartsField
+  ) {
+    return
+  }
+  // Assume all other component types are to handle string values
+  if (jsDatatype === 'string' && sharepointProp?.datatype === 'string') {
+    return
+  }
+  throw new Error(
+    `Invalid datatype for column '${component.shortDescription}' - ${jsDatatype} in form definition but ${sharepointProp?.datatype} in Sharepoint list column`
+  )
+}
+
+/**
  * Map display names to internal names (since Sharepoint only accepts internal names when using MS Graph)
  * @param {Map<string, CellValue>} fields
- * @param {Map<string, string>} dispNameToIntName
+ * @param {Map<string, { name: string, datatype: string }>} properties
  * @returns {Map<string, CellValue>}
  */
-export function mapFieldNames(fields, dispNameToIntName) {
+export function mapFieldNames(fields, properties) {
   const mapped = new Map()
   for (const [key, value] of fields.entries()) {
-    const internalName = dispNameToIntName.get(key)
-    if (!internalName) {
+    const property = properties.get(key)
+    if (!property?.name) {
       throw new Error(`Internal name not found for display name '${key}'`)
     }
-    if (key) {
-      mapped.set(dispNameToIntName.get(key), value)
+    if (key && value) {
+      mapped.set(property.name, value)
     }
   }
   return mapped
@@ -188,17 +241,42 @@ export function addPaymentFields(message, fields) {
 }
 
 /**
+ *
+ * @param {SharepointColumn} col
+ */
+export function getSharepointDatatype(col) {
+  if (col.number) {
+    return 'number'
+  }
+  if (col.dateTime) {
+    return 'date'
+  }
+  if (col.text) {
+    return 'string'
+  }
+  return 'unknown'
+}
+
+/**
  * Gets list of column properties as a map (specifically display name and internal name) from a SharePoint list
  * @param {string} siteId - id of the site
  * @param {string} listId - id of the list
  */
-export async function createMapOfColumnNameMappings(siteId, listId) {
+export async function createMapOfColumnProperties(siteId, listId) {
   const columns = await getColumnPropertiesFromGraph(
     graphClient,
     siteId,
     listId
   )
-  return new Map((columns ?? []).map((col) => [col.displayName, col.name]))
+  return new Map(
+    (columns ?? []).map((col) => [
+      col.displayName,
+      {
+        name: col.name,
+        datatype: getSharepointDatatype(col)
+      }
+    ])
+  )
 }
 
 /**
@@ -231,10 +309,7 @@ export async function saveToSharepointList(message) {
   const componentNameToShortDesc =
     createMapOfComponentNameToShortDesc(definition)
 
-  const displayNameToInternalName = await createMapOfColumnNameMappings(
-    siteId,
-    listId
-  )
+  const columnProperties = await createMapOfColumnProperties(siteId, listId)
 
   const formModel = new FormModel(replaceCustomControllers(definition), {
     basePath: '',
@@ -262,6 +337,7 @@ export async function saveToSharepointList(message) {
         const baseComponentKey = componentNameToShortDesc.get(component.name)
         const componentKey = `${baseComponentKey} ${index + 1}`
 
+        datatypeGuard(component, componentKey, value, columnProperties)
         fields.set(componentKey, value)
       }
     } else if (component.type === ComponentType.FileUploadField) {
@@ -270,13 +346,17 @@ export async function saveToSharepointList(message) {
         ? files.map((f) => f.userDownloadLink).join(' \r\n')
         : ''
 
-      fields.set(componentNameToShortDesc.get(component.name) ?? '', fileLinks)
+      const fieldName = componentNameToShortDesc.get(component.name) ?? ''
+      datatypeGuard(component, fieldName, 'string', columnProperties)
+      fields.set(fieldName, fileLinks)
     } else if (component.type === ComponentType.PaymentField) {
       addPaymentFields(message, fields)
     } else {
       const value = getValue(data.main, key, component)
 
-      fields.set(componentNameToShortDesc.get(component.name) ?? '', value)
+      const fieldName = componentNameToShortDesc.get(component.name) ?? ''
+      datatypeGuard(component, fieldName, value, columnProperties)
+      fields.set(fieldName, value)
     }
   })
 
@@ -284,7 +364,7 @@ export async function saveToSharepointList(message) {
     `Constructed data for form id ${formId} - about to call Sharepoint`
   )
 
-  const mappedFields = mapFieldNames(fields, displayNameToInternalName)
+  const mappedFields = mapFieldNames(fields, columnProperties)
   await addItemsByFieldName(graphClient, siteId, listId, mappedFields)
 
   logger.info(`Saved successfully to Sharepoint for form id ${formId}`)
@@ -294,5 +374,5 @@ export async function saveToSharepointList(message) {
  * @import { FormDefinition } from '@defra/forms-model'
  * @import { FormAdapterSubmissionMessage, FormAdapterSubmissionMessageMeta } from '@defra/forms-engine-plugin/engine/types.js'
  * @import { Component } from '@defra/forms-engine-plugin/engine/components/helpers/components.js'
- * @import { CellValue, FormMapping } from '~/src/service/sharepoint-types.js'
+ * @import { CellValue, FormMapping, SharepointColumn } from '~/src/service/sharepoint-types.js'
  */

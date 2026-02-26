@@ -18,5 +18,9 @@
  */
 
 /**
+ * @typedef {{ displayName: string, name: string, number?: object, text?: object, dateTime?: object } } SharepointColumn
+ */
+
+/**
  * @import { FormStatus } from '@defra/forms-model'
  */

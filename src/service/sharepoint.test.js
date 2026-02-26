@@ -14,7 +14,7 @@ import {
   addBaseFields,
   addPaymentFields,
   componentValueMapper,
-  createMapOfColumnNameMappings,
+  createMapOfColumnProperties,
   createMapOfComponentNameToShortDesc,
   getValue,
   loadFormMappings,
@@ -35,111 +35,138 @@ jest.mock('~/src/service/ms-graph.js')
 const fieldNameMappings = [
   {
     name: 'Autocompletefield',
-    displayName: 'Autocomplete field'
+    displayName: 'Autocomplete field',
+    text: {}
   },
   {
     name: 'Checkboxesfield',
-    displayName: 'Checkboxes field'
+    displayName: 'Checkboxes field',
+    text: {}
   },
   {
     name: 'Dateofbirth1',
-    displayName: 'Date of birth 1'
+    displayName: 'Date of birth 1',
+    dateTime: {}
   },
   {
     name: 'Dateofbirth2',
-    displayName: 'Date of birth 2'
+    displayName: 'Date of birth 2',
+    dateTime: {}
   },
   {
     name: 'Datepartsfield',
-    displayName: 'Date parts field'
+    displayName: 'Date parts field',
+    dateTime: {}
   },
   {
     name: 'Declarationquestion',
-    displayName: 'Declaration question'
+    displayName: 'Declaration question',
+    text: {}
   },
   {
     name: 'Eastingandnorthing',
-    displayName: 'Easting and northing'
+    displayName: 'Easting and northing',
+    text: {}
   },
   {
     name: 'Emailaddress',
-    displayName: 'Email address'
+    displayName: 'Email address',
+    text: {}
   },
   {
     name: 'Favouritefruit1',
-    displayName: 'Favourite fruit 1'
+    displayName: 'Favourite fruit 1',
+    text: {}
   },
   {
     name: 'Favouritefruit2',
-    displayName: 'Favourite fruit 2'
+    displayName: 'Favourite fruit 2',
+    text: {}
   },
   {
     name: 'Monthandyear',
-    displayName: 'Month and year'
+    displayName: 'Month and year',
+    text: {}
   },
   {
     name: 'Multiline',
-    displayName: 'Multiline'
+    displayName: 'Multiline',
+    text: {}
   },
   {
     name: 'Number',
-    displayName: 'Number'
+    displayName: 'Number',
+    number: {}
   },
   {
     name: 'Paymentamount',
-    displayName: 'Payment amount'
+    displayName: 'Payment amount',
+    number: {}
   },
   {
     name: 'Paymentdate',
-    displayName: 'Payment date'
+    displayName: 'Payment date',
+    dateTime: {}
   },
   {
     name: 'Paymentdescription',
-    displayName: 'Payment description'
+    displayName: 'Payment description',
+    text: {}
   },
   {
     name: 'Paymentreference',
-    displayName: 'Payment reference'
+    displayName: 'Payment reference',
+    text: {}
   },
   {
     name: 'Phonenumber',
-    displayName: 'Phone number'
+    displayName: 'Phone number',
+    text: {}
   },
   {
     name: 'Radiosfield',
-    displayName: 'Radios field'
+    displayName: 'Radios field',
+    text: {}
   },
   {
     name: 'Referencenumber',
-    displayName: 'Reference number'
+    displayName: 'Reference number',
+    text: {}
   },
   {
     name: 'Selectfield',
-    displayName: 'Select field'
+    displayName: 'Select field',
+    text: {}
   },
   {
     name: 'Submissiondate',
-    displayName: 'Submission date'
+    displayName: 'Submission date',
+    dateTime: {}
   },
   {
     name: 'Submissiontype',
-    displayName: 'Submission type'
+    displayName: 'Submission type',
+    text: {}
   },
   {
     name: 'Textfield',
-    displayName: 'Text field'
+    displayName: 'Text field',
+    text: {}
   },
   {
     name: 'UKaddressfield',
-    displayName: 'UK address field'
+    displayName: 'UK address field',
+    text: {}
   },
   {
     name: 'Yesorno',
-    displayName: 'Yes or no'
+    displayName: 'Yes or no',
+    text: {}
   },
   {
     name: 'Yourfile',
-    displayName: 'Your file'
+    displayName: 'Your file',
+    text: {}
   }
 ]
 
@@ -220,7 +247,7 @@ line 3`
       )
     })
 
-    it('should construct correct data from message to send to sharepoint - some fields empty', async () => {
+    it('should construct correct data from message to send to sharepoint - empty fields omitted', async () => {
       jest
         .mocked(getFormDefinition)
         .mockResolvedValue(definitionForSharepointTest)
@@ -235,13 +262,11 @@ line 3`
         ['Checkboxesfield', 'Item 2'],
         ['Datepartsfield', new Date(2026, 11, 12)],
         ['Declarationquestion', 'I understand and agree'],
-        ['Eastingandnorthing', ''],
         ['Emailaddress', 'email1@testing.co.uk'],
         ['Dateofbirth1', new Date(2000, 10, 1)],
         ['Dateofbirth2', new Date(1990, 6, 21)],
         ['Favouritefruit1', 'Apple'],
         ['Favouritefruit2', 'Banana'],
-        ['Monthandyear', ''],
         [
           'Multiline',
           `multiline line 1
@@ -396,8 +421,8 @@ line 3`
       fields.set('field 2', 'val2')
       fields.set('field 3', 'val3')
       const mapOfNames = new Map()
-      mapOfNames.set('field 1', 'field1')
-      mapOfNames.set('field 3', 'field3')
+      mapOfNames.set('field 1', { name: 'field1' })
+      mapOfNames.set('field 3', { name: 'field3' })
       expect(() => mapFieldNames(fields, mapOfNames)).toThrow(
         "Internal name not found for display name 'field 2'"
       )
@@ -409,9 +434,9 @@ line 3`
       fields.set(undefined, 'val2')
       fields.set('field 3', 'val3')
       const mapOfNames = new Map()
-      mapOfNames.set('field 1', 'field1')
-      mapOfNames.set(undefined, 'problem-field')
-      mapOfNames.set('field 3', 'field3')
+      mapOfNames.set('field 1', { name: 'field1' })
+      mapOfNames.set(undefined, { name: 'problem-field' })
+      mapOfNames.set('field 3', { name: 'field3' })
       const res = mapFieldNames(fields, mapOfNames)
       expect(res).toEqual(
         new Map([
@@ -458,7 +483,7 @@ line 3`
   describe('createMapOfColumnNameMappings', () => {
     it('should handle no columns', async () => {
       jest.mocked(getColumnPropertiesFromGraph).mockResolvedValueOnce(undefined)
-      const map = await createMapOfColumnNameMappings('site-id', 'list-id')
+      const map = await createMapOfColumnProperties('site-id', 'list-id')
       expect(map).toBeDefined()
       expect(map.size).toBe(0)
     })
