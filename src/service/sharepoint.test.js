@@ -402,6 +402,24 @@ line 3`
         "Internal name not found for display name 'field 2'"
       )
     })
+
+    it('should ignore if field key is undefined', () => {
+      const fields = new Map()
+      fields.set('field 1', 'val1')
+      fields.set(undefined, 'val2')
+      fields.set('field 3', 'val3')
+      const mapOfNames = new Map()
+      mapOfNames.set('field 1', 'field1')
+      mapOfNames.set(undefined, 'problem-field')
+      mapOfNames.set('field 3', 'field3')
+      const res = mapFieldNames(fields, mapOfNames)
+      expect(res).toEqual(
+        new Map([
+          ['field1', 'val1'],
+          ['field3', 'val3']
+        ])
+      )
+    })
   })
 
   describe('componentValueMapper', () => {
