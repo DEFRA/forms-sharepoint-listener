@@ -107,7 +107,9 @@ export function mapFieldNames(fields, dispNameToIntName) {
     if (!internalName) {
       throw new Error(`Internal name not found for display name '${key}'`)
     }
-    mapped.set(dispNameToIntName.get(key), value)
+    if (key) {
+      mapped.set(dispNameToIntName.get(key), value)
+    }
   }
   return mapped
 }
