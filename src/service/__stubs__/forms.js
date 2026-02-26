@@ -12,6 +12,14 @@ export const definitionForSharepointTest = buildDefinition({
       path: '/personal-details',
       components: [
         {
+          type: ComponentType.Markdown,
+          title: 'Markdown field',
+          name: 'fRRtEf',
+          content: 'Some markdown text',
+          options: {},
+          id: 'db5cc2a3-57ec-4799-9371-8cd8dbb68601'
+        },
+        {
           type: ComponentType.TextField,
           title: 'Text field',
           name: 'wVRKCI',

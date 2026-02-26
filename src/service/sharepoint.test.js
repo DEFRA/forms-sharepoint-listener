@@ -1,4 +1,4 @@
-import { buildMonthYearFieldComponent } from '@defra/forms-model/stubs'
+import { buildMonthYearFieldComponent, buildTextFieldComponent } from '@defra/forms-model/stubs'
 
 import { getFormDefinition } from '~/src/lib/manager.js'
 import { definitionForSharepointTest } from '~/src/service/__stubs__/forms.js'
@@ -7,6 +7,8 @@ import {
   addItemsByFieldName,
   addPaymentFields,
   componentValueMapper,
+  createMapOfComponentNameToShortDesc,
+  getValue,
   loadFormMappings,
   mapFieldNames,
   saveToSharepointList
@@ -388,8 +390,32 @@ line 3`,
       expect(componentValueMapper(component, value)).toBe('2026/02')
     })
   })
+
+  describe('getValue', () => {
+    it('should handle key not in data', () => {
+      const data = {
+        'abcdef': 'val1'
+      }
+      const component = buildTextFieldComponent()
+      expect(getValue(data, 'abcxxx', component)).toBeUndefined()
+    })
+  })
+
+  describe('createMapOfComponentNameToShortDesc', () => {
+    it('should handle missing short desc', () => {
+      const badDefinition = {
+        ...definitionForSharepointTest
+      }
+      // @ts-expect-error - no need to coalesce for tests
+      delete badDefinition.pages[0].components[1].shortDescription
+      const map = createMapOfComponentNameToShortDesc(definitionForSharepointTest)
+      expect(map).toBeDefined()
+      expect(map.get('--missing-short-desc--')).toBe('')
+    })
+  })
 })
 
 /**
+ * @import { PageQuestion } from '@defra/forms-model'
  * @import { CellValue } from '~/src/service/sharepoint.js'
  */
