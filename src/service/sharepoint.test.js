@@ -1,4 +1,7 @@
-import { buildMonthYearFieldComponent, buildTextFieldComponent } from '@defra/forms-model/stubs'
+import {
+  buildMonthYearFieldComponent,
+  buildTextFieldComponent
+} from '@defra/forms-model/stubs'
 
 import { getFormDefinition } from '~/src/lib/manager.js'
 import { definitionForSharepointTest } from '~/src/service/__stubs__/forms.js'
@@ -394,7 +397,7 @@ line 3`,
   describe('getValue', () => {
     it('should handle key not in data', () => {
       const data = {
-        'abcdef': 'val1'
+        abcdef: 'val1'
       }
       const component = buildTextFieldComponent()
       expect(getValue(data, 'abcxxx', component)).toBeUndefined()
@@ -408,7 +411,9 @@ line 3`,
       }
       // @ts-expect-error - no need to coalesce for tests
       delete badDefinition.pages[0].components[1].shortDescription
-      const map = createMapOfComponentNameToShortDesc(definitionForSharepointTest)
+      const map = createMapOfComponentNameToShortDesc(
+        definitionForSharepointTest
+      )
       expect(map).toBeDefined()
       expect(map.get('--missing-short-desc--')).toBe('')
     })
