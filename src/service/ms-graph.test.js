@@ -1,21 +1,16 @@
-import { addItemsByFieldName } from '~/src/service/ms-graph.js'
+import {
+  addItemsByFieldName,
+  getColumnPropertiesFromGraph
+} from '~/src/service/ms-graph.js'
 
-const fieldNameMappings = [
-  {
-    name: 'Autocompletefield',
-    displayName: 'Autocomplete field'
-  },
-  {
-    name: 'Checkboxesfield',
-    displayName: 'Checkboxes field'
-  }
-]
-
+const mockClientGetCall = () => ({
+  value: [{ name: 'name1', displayName: 'display name 1' }]
+})
 const mockClientPostCall = jest.fn()
 const mockClientApiCall = {
   post: (/** @type {Map<string, string>} */ fields) =>
     mockClientPostCall(fields),
-  get: () => Promise.resolve({ value: fieldNameMappings })
+  get: () => mockClientGetCall()
 }
 const mockGraphClient = {
   api: () => mockClientApiCall
@@ -46,12 +41,12 @@ describe('ms-graph', () => {
       const fields = new Map()
       fields.set('field1', 'value1')
       // @ts-expect-error - partial mock of client
-      await addItemsByFieldName(mockGraphClient, siteId, listId, fields)
-      expect(mockClientPostCall).toHaveBeenCalledWith({
-        fields: {
-          field1: 'value1'
-        }
-      })
+      const res = await getColumnPropertiesFromGraph(
+        mockGraphClient,
+        siteId,
+        listId
+      )
+      expect(res).toEqual([{ displayName: 'display name 1', name: 'name1' }])
     })
   })
 })
