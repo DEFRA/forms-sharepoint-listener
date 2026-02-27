@@ -16,6 +16,9 @@ import {
   componentValueMapper,
   createMapOfColumnProperties,
   createMapOfComponentNameToShortDesc,
+  datatypeGuard,
+  getJsDatatype,
+  getSharepointDatatype,
   getValue,
   loadFormMappings,
   mapFieldNames,
@@ -524,6 +527,37 @@ line 3`
       addBaseFields(definition, message, fields)
       expect(fields.size).toBe(2)
       expect(fields.get('Submission type')).toBe('Real')
+    })
+  })
+
+  describe('getJsDatatype', () => {
+    it('should return the correct type', () => {
+      expect(getJsDatatype(123)).toBe('number')
+      expect(getJsDatatype('abc')).toBe('string')
+      expect(getJsDatatype(new Date())).toBe('date')
+      expect(getJsDatatype({})).toBe('unknown')
+      expect(getJsDatatype([])).toBe('unknown')
+    })
+  })
+
+  describe('datatypeGuard', () => {
+    it('should throw if mismatch of types', () => {
+      const component = buildTextFieldComponent()
+      const properties = new Map([
+        ['my-field', { name: 'my-field', datatype: 'string' }]
+      ])
+      expect(() => {
+        datatypeGuard(component, 'my-field', new Date(), properties)
+      }).toThrow(
+        "Invalid datatype for column 'my-field' - date in form definition but string in Sharepoint list column"
+      )
+    })
+  })
+
+  describe('getSharepointDatatype', () => {
+    it('should return unknown if not number, date or string', () => {
+      const column = { displayName: 'my-col', name: 'my-col' }
+      expect(getSharepointDatatype(column)).toBe('unknown')
     })
   })
 })
