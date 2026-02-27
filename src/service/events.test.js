@@ -12,6 +12,7 @@ import {
   buildMessageStub
 } from '~/src/service/__stubs__/event-builders.js'
 import {
+  appendInnerError,
   handleFormSubmissionEvents,
   mapFormAdapterSubmissionEvent
 } from '~/src/service/events.js'
@@ -245,9 +246,31 @@ describe('events', () => {
       expect(result.failed).toHaveLength(2)
     })
   })
+
+  describe('appendInnerError', () => {
+    it('should ignore if undefined error', () => {
+      expect(appendInnerError(undefined)).toBe('')
+    })
+
+    it('should ignore if no inner error', () => {
+      expect(appendInnerError({})).toBe('')
+    })
+
+    it('should ignore if bad JSON for inner error', () => {
+      expect(appendInnerError({ body: 'bad-json' })).toBe('')
+    })
+
+    it('should return string for inner error', () => {
+      expect(
+        appendInnerError({
+          body: '{ "innerError": { "some-prop": "prop-val1" } }'
+        })
+      ).toBe(' : {"some-prop":"prop-val1"}')
+    })
+  })
 })
 
 /**
  * @import { Message } from '@aws-sdk/client-sqs'
- * @import { FormAdapterSubmissionMessagePayload, FormAdapterSubmissionService } from '@defra/forms-engine-plugin/engine/types.js'
+ * @import { FormAdapterSubmissionService } from '@defra/forms-engine-plugin/engine/types.js'
  */

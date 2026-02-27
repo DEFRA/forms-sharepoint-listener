@@ -42,6 +42,19 @@ export function mapFormAdapterSubmissionEvent(message) {
 }
 
 /**
+ * @param {unknown} error
+ */
+export function appendInnerError(error) {
+  let body
+  try {
+    // @ts-expect-error - property may exists or not
+    body = JSON.parse(error?.body)
+  } catch {}
+
+  return body?.innerError ? ` : ${JSON.stringify(body.innerError)}` : ''
+}
+
+/**
  * Create form submission event
  * @template T
  * @param {Message[]} messages
@@ -71,10 +84,8 @@ export async function handleFormSubmissionEvents(
 
       return submissionBody
     } catch (err) {
-      logger.error(
-        err,
-        `[handleFormSubmissionEvents] Failed to handle message - ${getErrorMessage(err)}`
-      )
+      const errText = `[handleFormSubmissionEvents] Failed to handle message - ${getErrorMessage(err)}${appendInnerError(err)}`
+      logger.error(err, errText)
       throw err
     }
   }
