@@ -143,7 +143,7 @@ export function datatypeGuard(component, key, value, properties) {
     return
   }
   throw new Error(
-    `Invalid datatype for column '${key}' - ${jsDatatype} in form definition but ${sharepointProp?.datatype} in Sharepoint list column`
+    `Invalid datatype for column '${key}' - ${jsDatatype} in form definition but ${sharepointProp?.datatype ?? 'missing column'} in Sharepoint list`
   )
 }
 
@@ -326,6 +326,8 @@ export async function saveToSharepointList(message) {
     if (!component.isFormComponent) {
       return
     }
+
+    component.name = component.name.trim()
 
     if (hasRepeater(component.page.pageDef)) {
       const repeaterName = component.page.pageDef.repeat.options.name

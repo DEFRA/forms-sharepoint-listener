@@ -33,6 +33,19 @@ export const definitionForSharepointTest = buildDefinition({
           id: '0540fdbf-4c67-4fe4-a732-4b7acec40d65'
         },
         {
+          type: ComponentType.TextField,
+          title: 'Text field with leading space in short desc',
+          name: 'ggHErt',
+          shortDescription: ' Leading space text field',
+          hint: '',
+          options: {
+            required: true,
+            classes: ''
+          },
+          schema: {},
+          id: 'c16f3f8a-e8a9-4817-860d-4767c70a4c0d'
+        },
+        {
           type: ComponentType.MultilineTextField,
           title: 'Multiline textfield',
           name: 'WInVOJ',
