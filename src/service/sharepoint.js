@@ -327,8 +327,6 @@ export async function saveToSharepointList(message) {
       return
     }
 
-    component.name = component.name.trim()
-
     if (hasRepeater(component.page.pageDef)) {
       const repeaterName = component.page.pageDef.repeat.options.name
       const hasRepeaterData = repeaterName in data.repeaters
