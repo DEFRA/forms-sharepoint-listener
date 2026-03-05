@@ -143,7 +143,7 @@ export function datatypeGuard(component, key, value, properties) {
     return
   }
   throw new Error(
-    `Invalid datatype for column '${key}' - ${jsDatatype} in form definition but ${sharepointProp?.datatype} in Sharepoint list column`
+    `Invalid datatype for column '${key}' - ${jsDatatype} in form definition but ${sharepointProp?.datatype ?? 'missing column'} in Sharepoint list`
   )
 }
 

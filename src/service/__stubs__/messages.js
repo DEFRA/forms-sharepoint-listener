@@ -37,6 +37,7 @@ line 3`,
       KDVPWv: 'Radio 1',
       JLyrSq: 'Autocomplete 2',
       ZjjIss: 'Select option 2',
+      ggHErt: 'Text with leading space in short desc',
       aDDfeH: { easting: 12345, northing: 67890 },
       LNOPHF: 'true'
     },

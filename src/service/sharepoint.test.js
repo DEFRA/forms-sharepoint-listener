@@ -87,6 +87,11 @@ const fieldNameMappings = [
     text: {}
   },
   {
+    name: 'Leadingspacetextfield',
+    displayName: 'Leading space text field',
+    text: {}
+  },
+  {
     name: 'Monthandyear',
     displayName: 'Month and year',
     text: {}
@@ -213,6 +218,7 @@ describe('sharepoint', () => {
         ['Dateofbirth2', new Date(1990, 6, 21)],
         ['Favouritefruit1', 'Apple'],
         ['Favouritefruit2', 'Banana'],
+        ['Leadingspacetextfield', 'Text with leading space in short desc'],
         ['Monthandyear', '2026/10'],
         [
           'Multiline',
@@ -270,6 +276,7 @@ line 3`
         ['Dateofbirth2', new Date(1990, 6, 21)],
         ['Favouritefruit1', 'Apple'],
         ['Favouritefruit2', 'Banana'],
+        ['Leadingspacetextfield', 'Text with leading space in short desc'],
         [
           'Multiline',
           `multiline line 1
@@ -304,7 +311,7 @@ line 3`
       )
     })
 
-    it('should construct correct data from message including reference number', async () => {
+    it('should construct correct data from message including reference number and leading space in short desc', async () => {
       const definitionWithRefNum = structuredClone(definitionForSharepointTest)
       definitionWithRefNum.options = { showReferenceNumber: true }
       jest.mocked(getFormDefinition).mockResolvedValue(definitionWithRefNum)
@@ -323,6 +330,7 @@ line 3`
         ['Dateofbirth2', new Date(1990, 6, 21)],
         ['Favouritefruit1', 'Apple'],
         ['Favouritefruit2', 'Banana'],
+        ['Leadingspacetextfield', 'Text with leading space in short desc'],
         ['Monthandyear', '2026/10'],
         [
           'Multiline',
@@ -549,7 +557,17 @@ line 3`
       expect(() => {
         datatypeGuard(component, 'my-field', new Date(), properties)
       }).toThrow(
-        "Invalid datatype for column 'my-field' - date in form definition but string in Sharepoint list column"
+        "Invalid datatype for column 'my-field' - date in form definition but string in Sharepoint list"
+      )
+    })
+
+    it('should throw if missing from Sharepoint', () => {
+      const component = buildTextFieldComponent()
+      const properties = new Map()
+      expect(() => {
+        datatypeGuard(component, 'my-field', new Date(), properties)
+      }).toThrow(
+        "Invalid datatype for column 'my-field' - date in form definition but missing column in Sharepoint list"
       )
     })
   })
