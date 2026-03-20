@@ -17,7 +17,7 @@ declare module '@hapi/hapi' {
      * User ID
      */
     id: UserProfile['sub']
-    
+
     /**
      * User email address
      */
