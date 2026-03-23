@@ -1,7 +1,5 @@
 import { createServer } from '~/src/api/server.js'
 
-jest.mock('~/src/tasks/receive-messages.js')
-
 describe('Health route', () => {
   /** @type {Server} */
   let server
