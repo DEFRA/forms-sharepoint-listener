@@ -312,8 +312,7 @@ export async function saveToSharepointList(message) {
   const columnProperties = await createMapOfColumnProperties(siteId, listId)
 
   const formModel = new FormModel(replaceCustomControllers(definition), {
-    basePath: '',
-    versionNumber: versionMetadata?.versionNumber
+    basePath: ''
   })
 
   /** @type {Map<string, CellValue >} */
