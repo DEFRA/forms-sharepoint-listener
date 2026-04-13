@@ -5,6 +5,14 @@ import { getJson } from '~/src/lib/fetch.js'
 import { getFormDefinition, getFormMetadata } from '~/src/lib/manager.js'
 
 jest.mock('~/src/lib/fetch.js')
+jest.mock('~/src/helpers/logging/logger.js', () => ({
+  createLogger: () => ({
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+    debug: jest.fn()
+  })
+}))
 jest.mock('~/src/config/index.js', () => ({
   config: {
     get: jest.fn().mockReturnValueOnce('')
