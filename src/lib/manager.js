@@ -21,13 +21,13 @@ export async function getFormDefinition(formId, formStatus, versionNumber) {
 
   if (versionNumber !== undefined) {
     try {
-      const { body } = await getJson(
+      const { body: versionedBody } = await getJson(
         new URL(
           `/forms/${formId}/versions/${versionNumber}/definition`,
           managerUrl
         )
       )
-      return body
+      return versionedBody
     } catch (err) {
       logger.warn(
         err,
