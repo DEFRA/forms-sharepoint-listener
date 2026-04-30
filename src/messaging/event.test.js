@@ -15,7 +15,13 @@ import {
   redriveDlqMessages
 } from '~/src/messaging/event.js'
 
-jest.mock('~/src/helpers/logging/logger.js')
+jest.mock('~/src/helpers/logging/logger.js', () => ({
+  logger: {
+    info: jest.fn(),
+    error: jest.fn(),
+    debug: jest.fn()
+  }
+}))
 
 describe('event', () => {
   const snsMock = mockClient(SQSClient)

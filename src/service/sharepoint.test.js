@@ -26,11 +26,11 @@ import {
 } from '~/src/service/sharepoint.js'
 
 jest.mock('~/src/helpers/logging/logger.js', () => ({
-  createLogger: () => ({
+  logger: {
     info: jest.fn(),
     error: jest.fn(),
     debug: jest.fn()
-  })
+  }
 }))
 jest.mock('~/src/lib/manager.js')
 jest.mock('~/src/service/ms-graph.js')

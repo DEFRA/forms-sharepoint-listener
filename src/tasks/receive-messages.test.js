@@ -7,7 +7,13 @@ import { handleEvent } from '~/src/service/index.js'
 import { runTask, runTaskOnce } from '~/src/tasks/receive-messages.js'
 jest.mock('~/src/messaging/event.js')
 jest.mock('~/src/service/index.js')
-jest.mock('~/src/helpers/logging/logger.js')
+jest.mock('~/src/helpers/logging/logger.js', () => ({
+  logger: {
+    info: jest.fn(),
+    error: jest.fn(),
+    debug: jest.fn()
+  }
+}))
 
 /**
  * @returns {void}

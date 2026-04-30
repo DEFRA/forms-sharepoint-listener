@@ -18,7 +18,13 @@ import {
 } from '~/src/service/events.js'
 
 jest.mock('~/src/messaging/event.js')
-jest.mock('~/src/helpers/logging/logger.js')
+jest.mock('~/src/helpers/logging/logger.js', () => ({
+  logger: {
+    info: jest.fn(),
+    error: jest.fn(),
+    debug: jest.fn()
+  }
+}))
 jest.mock('~/src/config/index.js', () => ({
   config: {
     get: jest.fn((key) => {

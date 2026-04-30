@@ -8,7 +8,7 @@ import {
 
 import { formMappingsSchema } from '~/src/config/form-mappings-schema.js'
 import { config } from '~/src/config/index.js'
-import { createLogger } from '~/src/helpers/logging/logger.js'
+import { logger } from '~/src/helpers/logging/logger.js'
 import { getFormDefinition } from '~/src/lib/manager.js'
 import {
   addItemsByFieldName,
@@ -16,7 +16,6 @@ import {
 } from '~/src/service/ms-graph.js'
 import { getGraphClient } from '~/src/service/sharepoint-client.js'
 
-const logger = createLogger()
 const graphClient = getGraphClient()
 
 /**
