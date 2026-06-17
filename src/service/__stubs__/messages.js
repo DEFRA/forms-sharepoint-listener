@@ -8,7 +8,7 @@ export const messageForSharepointTest = {
     formName: 'Test submit',
     formId: '6945710fb0136fc28df80d71',
     formSlug: 'test-submit',
-    status: 'draft',
+    status: /** @type {FormStatus} */ ('draft'),
     isPreview: true,
     notificationEmail: 'jeremy.barnsley@esynergy.co.uk',
     versionMetadata: {
@@ -82,4 +82,5 @@ line 3`,
 
 /**
  * @import { FormAdapterSubmissionMessage } from '@defra/forms-engine-plugin/engine/types.js'
+ * @import { FormStatus } from '@defra/forms-model'
  */

@@ -107,7 +107,7 @@ export function componentValueMapper(component, value) {
     return ''
   }
 
-  return component.getDisplayStringFromFormValue(value)
+  return /** @type {any} */ (component).getDisplayStringFromFormValue(value)
 }
 
 /**
@@ -311,8 +311,7 @@ export async function saveToSharepointList(message) {
   const columnProperties = await createMapOfColumnProperties(siteId, listId)
 
   const formModel = new FormModel(replaceCustomControllers(definition), {
-    basePath: '',
-    versionNumber: versionMetadata?.versionNumber
+    basePath: ''
   })
 
   /** @type {Map<string, CellValue >} */
@@ -326,7 +325,7 @@ export async function saveToSharepointList(message) {
       return
     }
 
-    if (hasRepeater(component.page.pageDef)) {
+    if (component.page && hasRepeater(component.page.pageDef)) {
       const repeaterName = component.page.pageDef.repeat.options.name
       const hasRepeaterData = repeaterName in data.repeaters
       const items = hasRepeaterData ? data.repeaters[repeaterName] : []

@@ -460,7 +460,7 @@ line 3`
 
   describe('componentValueMapper', () => {
     it('should handle month requiring leading zero when Month/Year', () => {
-      const component = buildMonthYearFieldComponent()
+      const component = /** @type {any} */ (buildMonthYearFieldComponent())
       const value = { year: 2026, month: 2 }
       expect(componentValueMapper(component, value)).toBe('2026/02')
     })
@@ -471,7 +471,7 @@ line 3`
       const data = {
         abcdef: 'val1'
       }
-      const component = buildTextFieldComponent()
+      const component = /** @type {any} */ (buildTextFieldComponent())
       expect(getValue(data, 'abcxxx', component)).toBeUndefined()
     })
   })
@@ -550,7 +550,7 @@ line 3`
 
   describe('datatypeGuard', () => {
     it('should throw if mismatch of types', () => {
-      const component = buildTextFieldComponent()
+      const component = /** @type {any} */ (buildTextFieldComponent())
       const properties = new Map([
         ['my-field', { name: 'my-field', datatype: 'string' }]
       ])
@@ -562,7 +562,7 @@ line 3`
     })
 
     it('should throw if missing from Sharepoint', () => {
-      const component = buildTextFieldComponent()
+      const component = /** @type {any} */ (buildTextFieldComponent())
       const properties = new Map()
       expect(() => {
         datatypeGuard(component, 'my-field', new Date(), properties)

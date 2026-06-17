@@ -48,7 +48,7 @@ describe('events', () => {
     formName: 'Order a pizza',
     formId: '68a8b0449ab460290c28940a',
     formSlug: 'order-a-pizza',
-    status: 'live',
+    status: /** @type {FormStatus} */ ('live'),
     isPreview: false,
     notificationEmail: 'info@example.com'
   }
@@ -277,4 +277,5 @@ describe('events', () => {
 /**
  * @import { Message } from '@aws-sdk/client-sqs'
  * @import { FormAdapterSubmissionService } from '@defra/forms-engine-plugin/engine/types.js'
+ * @import { FormStatus } from '@defra/forms-model'
  */
