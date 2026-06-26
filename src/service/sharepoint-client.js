@@ -1,53 +1,37 @@
 import { ClientSecretCredential } from '@azure/identity'
 import { Client } from '@microsoft/microsoft-graph-client'
 import { TokenCredentialAuthenticationProvider } from '@microsoft/microsoft-graph-client/lib/src/authentication/azureTokenCredentials/TokenCredentialAuthenticationProvider.js'
-import { ProxyAgent } from 'undici'
 
 import { config } from '~/src/config/index.js'
 
 const sharepointConfig = config.get('sharepoint')
 
-const proxyUrlConfig = /** @type { string | null } */ (config.get('httpsProxy'))
+const proxyUrlConfig = /** @type { string | null } */ (config.get('httpProxy'))
 
 /**
  * @param {string | null} proxyConfig - proxy url from config
- * @returns {{ proxyOptions: { host: string, port: number }} | undefined }
+ * @returns {{ proxyOptions: { host: string, port: number, username: string, password: string }} | undefined }
  */
-function getProxy(proxyConfig) {
+export function proxyOptions(proxyConfig) {
   if (!proxyConfig) {
     return undefined
   }
-  const proxyUrl = new URL(proxyConfig)
-  const port = Number.parseInt(proxyUrl.port)
+  const url = new URL(proxyConfig)
   return {
     proxyOptions: {
-      host: proxyUrl.href,
-      port
+      host: url.href,
+      port: Number(url.port),
+      username: url.username,
+      password: url.password
     }
   }
-}
-
-/**
- * @param {string | null} proxyConfig - proxy url from config
- * @returns {FetchOptions} | {} }
- */
-function getFetchOptions(proxyConfig) {
-  return proxyConfig
-    ? /** @type {FetchOptions} */ ({
-        dispatcher: new ProxyAgent({
-          uri: proxyConfig,
-          keepAliveTimeout: 10,
-          keepAliveMaxTimeout: 10
-        })
-      })
-    : {}
 }
 
 const credential = new ClientSecretCredential(
   sharepointConfig.tenantId,
   sharepointConfig.clientId,
   sharepointConfig.clientSecret,
-  getProxy(proxyUrlConfig)
+  proxyOptions(proxyUrlConfig)
 )
 
 const authProvider = new TokenCredentialAuthenticationProvider(credential, {
@@ -60,8 +44,8 @@ const authProvider = new TokenCredentialAuthenticationProvider(credential, {
  */
 export function getGraphClient() {
   return Client.initWithMiddleware({
-    authProvider,
-    fetchOptions: getFetchOptions(proxyUrlConfig)
+    debugLogging: true,
+    authProvider
   })
 }
 

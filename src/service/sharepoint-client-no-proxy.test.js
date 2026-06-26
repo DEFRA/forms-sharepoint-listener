@@ -1,9 +1,12 @@
-import { getGraphClient } from '~/src/service/sharepoint-client.js'
+import {
+  getGraphClient,
+  proxyOptions
+} from '~/src/service/sharepoint-client.js'
 
 jest.mock('~/src/config/index.js', () => ({
   config: {
     get: jest.fn((key) => {
-      if (key === 'httpsProxy') return null
+      if (key === 'httpProxy') return null
       return {
         tenantId: '6f504113-6b64-43f2-ade9-242e05780007',
         clientId: 'dummy',
@@ -19,9 +22,16 @@ describe('sharepoint client', () => {
       const client = getGraphClient()
       expect(client).toBeDefined()
       // @ts-expect-error - config is private
-      expect(client.config.fetchOptions).toEqual({})
-      // @ts-expect-error - config is private
-      expect(client.config.fetchOptions.dispatcher).toBeUndefined()
+      expect(client.config.authProvider.authenticationProviderOptions).toEqual({
+        scopes: ['https://graph.microsoft.com/.default']
+      })
+    })
+  })
+
+  describe('proxyOptions', () => {
+    it('should return undefined when no proxy configured', () => {
+      const options = proxyOptions('')
+      expect(options).toBeUndefined()
     })
   })
 })
