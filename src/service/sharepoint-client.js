@@ -44,7 +44,6 @@ const authProvider = new TokenCredentialAuthenticationProvider(credential, {
  */
 export function getGraphClient() {
   return Client.initWithMiddleware({
-    debugLogging: true,
     authProvider
   })
 }
