@@ -184,6 +184,10 @@ jest.mock('~/src/service/sharepoint-client.js', () => {
   }
 })
 
+const mockTranslator = /** @type {Translator} */ ({
+  language: 'en-GB'
+})
+
 describe('sharepoint', () => {
   beforeEach(() => {
     jest
@@ -462,7 +466,9 @@ line 3`
     it('should handle month requiring leading zero when Month/Year', () => {
       const component = /** @type {any} */ (buildMonthYearFieldComponent())
       const value = { year: 2026, month: 2 }
-      expect(componentValueMapper(component, value)).toBe('2026/02')
+      expect(componentValueMapper(component, value, mockTranslator)).toBe(
+        '2026/02'
+      )
     })
   })
 
@@ -472,7 +478,9 @@ line 3`
         abcdef: 'val1'
       }
       const component = /** @type {any} */ (buildTextFieldComponent())
-      expect(getValue(data, 'abcxxx', component)).toBeUndefined()
+      expect(
+        getValue(data, 'abcxxx', component, mockTranslator)
+      ).toBeUndefined()
     })
   })
 
@@ -582,4 +590,5 @@ line 3`
 
 /**
  * @import { CellValue } from '~/src/service/sharepoint-types.js'
+ * @import { Translator } from '@defra/forms-engine-plugin/engine/i18n/types.js'
  */
