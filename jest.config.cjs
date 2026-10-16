@@ -45,7 +45,8 @@ module.exports = {
       'slug', // Supports ESM only
       '@defra/hapi-tracing', // Supports ESM only
       '@defra/forms-engine-plugin', // Supports ESM only
-      'geodesy' // Supports ESM only
+      'geodesy', // Supports ESM only
+      '@joi/date' // Supports ESM only
     ].join('|')}/)`
   ]
 }
