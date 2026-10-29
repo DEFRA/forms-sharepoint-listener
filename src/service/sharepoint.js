@@ -90,8 +90,9 @@ export function coerceDataValue(asText, component) {
 /**
  * @param {Component} component
  * @param {any} value
+ * @param {Translator} translator - translate content to a different language if necessary
  */
-export function componentValueMapper(component, value) {
+export function componentValueMapper(component, value, translator) {
   if (component.type === ComponentType.EastingNorthingField) {
     return value && 'easting' in value && 'northing' in value
       ? `Easting: ${value.easting}, Northing: ${value.northing}`
@@ -107,7 +108,10 @@ export function componentValueMapper(component, value) {
     return ''
   }
 
-  return /** @type {any} */ (component).getDisplayStringFromFormValue(value)
+  return /** @type {any} */ (component).getDisplayStringFromFormValue(
+    value,
+    translator
+  )
 }
 
 /**
@@ -171,11 +175,14 @@ export function mapFieldNames(fields, properties) {
  * @param {Record<string, any>} data - the answers data
  * @param {string} key - the component key (name)
  * @param {Component} component - the form component
+ * @param {Translator} translator - translate content to a different language if necessary
  * @returns {CellValue}
  */
-export function getValue(data, key, component) {
+export function getValue(data, key, component, translator) {
   const asText =
-    key in data ? componentValueMapper(component, data[key]) : undefined
+    key in data
+      ? componentValueMapper(component, data[key], translator)
+      : undefined
 
   return coerceDataValue(asText, component)
 }
@@ -314,6 +321,9 @@ export async function saveToSharepointList(message) {
     basePath: ''
   })
 
+  // Default to English
+  const translator = formModel.createTranslator()
+
   /** @type {Map<string, CellValue >} */
   const fields = new Map()
 
@@ -331,7 +341,7 @@ export async function saveToSharepointList(message) {
       const items = hasRepeaterData ? data.repeaters[repeaterName] : []
 
       for (let index = 0; index < items.length; index++) {
-        const value = getValue(items[index], key, component)
+        const value = getValue(items[index], key, component, translator)
         const baseComponentKey = componentNameToShortDesc.get(component.name)
         const componentKey = `${baseComponentKey} ${index + 1}`
 
@@ -350,7 +360,7 @@ export async function saveToSharepointList(message) {
     } else if (component.type === ComponentType.PaymentField) {
       addPaymentFields(message, fields)
     } else {
-      const value = getValue(data.main, key, component)
+      const value = getValue(data.main, key, component, translator)
 
       const fieldName = componentNameToShortDesc.get(component.name) ?? ''
       datatypeGuard(component, fieldName, value, columnProperties)
@@ -372,5 +382,6 @@ export async function saveToSharepointList(message) {
  * @import { FormDefinition } from '@defra/forms-model'
  * @import { FormAdapterSubmissionMessage, FormAdapterSubmissionMessageMeta } from '@defra/forms-engine-plugin/engine/types.js'
  * @import { Component } from '@defra/forms-engine-plugin/engine/components/helpers/components.js'
+ * @import { Translator } from '@defra/forms-engine-plugin/engine/i18n/types.js'
  * @import { CellValue, FormMapping, SharepointColumn } from '~/src/service/sharepoint-types.js'
  */
