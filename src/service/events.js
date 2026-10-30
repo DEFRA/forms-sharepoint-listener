@@ -1,3 +1,4 @@
+import { runWithMessageLogContext } from '@defra/forms-common'
 import { formAdapterSubmissionMessagePayloadSchema } from '@defra/forms-engine-plugin/engine/types/schema.js'
 import { getErrorMessage } from '@defra/forms-model'
 import Joi from 'joi'
@@ -89,7 +90,11 @@ export async function handleFormSubmissionEvents(
   }
 
   const results = await Promise.allSettled(
-    messages.map(handleSingleSubmissionEvent)
+    messages.map((message) =>
+      runWithMessageLogContext(message, () =>
+        handleSingleSubmissionEvent(message)
+      )
+    )
   )
 
   const saved = results
