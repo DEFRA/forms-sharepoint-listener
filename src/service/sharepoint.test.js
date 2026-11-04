@@ -544,6 +544,31 @@ line 3`
       expect(fields.size).toBe(2)
       expect(fields.get('Submission type')).toBe('Real')
     })
+
+    it('should add base fields with action details', () => {
+      /** @type {Map<string, CellValue >} */
+      const fields = new Map()
+      const definition = {
+        ...definitionForSharepointTest,
+        metadata: {
+          options: {
+            allowCopy: true
+          }
+        }
+      }
+      const message = structuredClone(messageForSharepointTest)
+      message.meta.custom = {
+        actionName: 'copy',
+        actionReferenceNumber: 'PRV-123-456'
+      }
+      addBaseFields(definition, message, fields)
+      const fieldsArray = Array.from(fields.entries())
+      expect(fieldsArray).toEqual([
+        ['Submission date', new Date('2026-01-06T13:05:51.322Z')],
+        ['Submission type', 'Preview'],
+        ['Copied from reference number', 'PRV-123-456']
+      ])
+    })
   })
 
   describe('getJsDatatype', () => {
