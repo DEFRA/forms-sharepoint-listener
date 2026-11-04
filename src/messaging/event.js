@@ -136,7 +136,8 @@ export async function resubmitDlqMessage(messageId, messageJson) {
     const command = new SendMessageCommand({
       QueueUrl: queueUrl,
       MessageBody: messageJson,
-      MessageAttributes: originalMessage?.MessageAttributes ?? getMessageAttributes()
+      MessageAttributes:
+        originalMessage?.MessageAttributes ?? getMessageAttributes()
     })
     const sendResult = await sqsClient.send(command)
     logger.info(
