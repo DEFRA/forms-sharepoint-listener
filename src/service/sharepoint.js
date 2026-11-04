@@ -1,6 +1,8 @@
 import { FormModel } from '@defra/forms-engine-plugin/engine/models/FormModel.js'
 import {
   ComponentType,
+  FORM_ACTION_COPY,
+  getFormAction,
   hasComponentsEvenIfNoNext,
   hasRepeater,
   replaceCustomControllers
@@ -219,6 +221,12 @@ export function addBaseFields(definition, message, fields) {
   // Add reference number (if enabled)
   if (definition.options?.showReferenceNumber) {
     fields.set('Reference number', message.meta.referenceNumber)
+  }
+
+  // Add form action details if the action is a 'copy'
+  const actionDetails = getFormAction(message.meta, definition)
+  if (actionDetails?.name === FORM_ACTION_COPY) {
+    fields.set('Copied from reference number', actionDetails.referenceNumber)
   }
 }
 
